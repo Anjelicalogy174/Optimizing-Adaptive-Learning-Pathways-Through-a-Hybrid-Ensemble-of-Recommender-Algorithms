@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALPS · Adaptive Learning Pathway System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#1F4E79;--pri-dk:#15395B;--pri-soft:#E8EFF6;--gold:#C9A227;--teal:#2A8C82;
+  --bg:#EEF2F6;--sur:#fff;--sur2:#F1F5F9;--ink:#1E2A38;--muted:#5B6B7B;--faint:#9AA7B2;--line:#E2E8EF;
+  --g:#2E7D5B;--b:#1F4E79;--y:#C9A227;--r:#C0492F;
+  --shadow:0 1px 3px rgba(31,46,56,.07),0 8px 20px -12px rgba(31,46,56,.22);--rad:13px;--tr:.2s ease;
+}
+[data-theme="dark"]{--bg:#0D1B2A;--sur:#14253A;--sur2:#1C3147;--ink:#DCE8F4;--muted:#7A95AE;--faint:#4A6070;--line:#243548;--pri-soft:#162438;--shadow:0 2px 4px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.5);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',monospace}
+.bar{background:linear-gradient(105deg,var(--pri-dk),var(--pri) 60%,var(--teal));color:#fff;display:flex;align-items:center;gap:14px;padding:10px 24px;box-shadow:0 2px 12px rgba(21,57,91,.3)}
+.logo{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.brand h1{font-size:15px;font-weight:600;line-height:1.1}.brand p{font-size:11px;color:#C7D7E8;font-weight:300}
+.badge{font-size:9px;font-weight:700;background:var(--gold);color:#3A2D05;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+main{max-width:980px;margin:0 auto;padding:44px 24px 70px}
+.hero{text-align:center;margin-bottom:40px}
+.hero .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--gold);font-weight:700}
+.hero h2{font-size:28px;font-weight:600;margin-top:8px;letter-spacing:-.3px}
+.hero p{color:var(--muted);font-size:14px;margin-top:10px;max-width:64ch;margin-left:auto;margin-right:auto;font-weight:300}
+.pipe{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:22px}
+.pipe span{background:var(--sur);border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--pri);box-shadow:var(--shadow)}
+.pipe i{color:var(--faint);font-size:11px}
+.flow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:34px}
+.fcard{background:var(--sur);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--ink);transition:transform .15s,box-shadow .15s;position:relative}
+.fcard:hover{transform:translateY(-3px);box-shadow:0 4px 8px rgba(31,46,56,.1),0 16px 30px -14px rgba(31,46,56,.28)}
+.fnum{width:30px;height:30px;border-radius:9px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
+.fcard h3{font-size:15.5px;font-weight:600}
+.fcard p{font-size:12.5px;color:var(--muted);font-weight:300;line-height:1.5}
+.fcard .who{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);font-weight:700}
+.fcard .go{margin-top:auto;font-size:12px;font-weight:600;color:var(--pri);display:flex;align-items:center;gap:5px}
+.arrow-row{display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:20px;margin:-24px 0 34px}
+.note{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);padding:20px 22px;font-size:12.5px;color:var(--muted);font-weight:300;line-height:1.7}
+.note b{color:var(--ink);font-weight:600}
+.note code{font-family:'JetBrains Mono',monospace;background:var(--sur2);padding:1px 5px;border-radius:4px;color:var(--pri);font-size:11.5px}
+@media(max-width:760px){.flow{grid-template-columns:1fr}.arrow-row{display:none}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1 2.7 3 6 3s6-2 6-3v-5.5"/></svg></div>
+  <div class="brand"><h1>Adaptive Learning Pathway System <span class="badge">LIVE </span></h1></header>
+
+<main>
+<div class="hero">
+  <div class="eyebrow">Thesis Demonstration · Anjelica M. Castillo</div>
+  <h2>One intelligent recommendation engine, three user interfaces</h2>
+  <p>
+    Although each interface serves a different purpose, they all interact with the
+    same machine learning pipeline. The <strong>Survey</strong> collects learner data,
+    the <strong>Dashboard</strong> presents cohort-level insights, and the
+    <strong>Instructor</strong> page provides detailed learner analysis. Every recommendation
+    is generated in real time through the same
+    <code class="mono" style="color:var(--pri)">/recommend</code> endpoint, ensuring
+    consistent results across the entire system.
+  </p>
+
+</div>
+
+  <div class="flow">
+    <a class="fcard" href="survey.html">
+      <div class="fnum">1</div>
+      <div class="who">Learner</div>
+      <h3>Take the Survey</h3>
+      <p>An 11-item bilingual (EN/FIL) profile survey. Submitting it calls <code>/recommend</code> live and shows the learner their own readiness tier and pathway.</p>
+      <div class="go">Open survey →</div>
+    </a>
+    <a class="fcard" href="dashboard.html">
+      <div class="fnum">2</div>
+      <div class="who">Analyst / Researcher</div>
+      <h3>Learner Dashboard</h3>
+      <p>The same pipeline, explored per learner: clustering position, recommended pathway, simulated assessment, and adaptive re-ranking.</p>
+      <div class="go">Open dashboard →</div>
+    </a>
+    <a class="fcard" href="instructor.html">
+      <div class="fnum">3</div>
+      <div class="who">Instructor</div>
+      <h3>Instructor Console</h3>
+      <p>Every learner in the cohort scored in one batch call, aggregated into readiness tiers and remediation hotspots for triage.</p>
+      <div class="go">Open console →</div>
+    </a>
+  </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALPS · Live ML Inference Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#1F4E79;--pri-dk:#15395B;--pri-soft:#E8EFF6;--gold:#C9A227;--teal:#2A8C82;
+  --bg:#EEF2F6;--sur:#fff;--sur2:#F1F5F9;--ink:#1E2A38;--muted:#5B6B7B;--faint:#9AA7B2;--line:#E2E8EF;
+  --g:#2E7D5B;--b:#1F4E79;--y:#C9A227;--r:#C0492F;
+  --shadow:0 1px 3px rgba(31,46,56,.07),0 8px 20px -12px rgba(31,46,56,.22);--rad:13px;--tr:.2s ease;
+}
+[data-theme="dark"]{--bg:#0D1B2A;--sur:#14253A;--sur2:#1C3147;--ink:#DCE8F4;--muted:#7A95AE;--faint:#4A6070;--line:#243548;--pri-soft:#162438;--shadow:0 2px 4px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.5);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+.mono{font-family:'JetBrains Mono',monospace}
+.bar{background:linear-gradient(105deg,var(--pri-dk),var(--pri) 60%,var(--teal));color:#fff;display:flex;align-items:center;gap:14px;padding:10px 24px;box-shadow:0 2px 12px rgba(21,57,91,.3)}
+.logo{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.brand h1{font-size:15px;font-weight:600;line-height:1.1}.brand p{font-size:11px;color:#C7D7E8;font-weight:300}
+.badge{font-size:9px;font-weight:700;background:var(--gold);color:#3A2D05;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.topright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:5px 10px;font-size:11.5px;font-weight:500;cursor:pointer}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#999;flex:none}
+.api-dot.ok{background:#4ADE80;box-shadow:0 0 6px #4ADE80}.api-dot.bad{background:#F87171;box-shadow:0 0 6px #F87171}.api-dot.wait{background:#FBBF24;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.pick{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:4px 6px}
+.pick select{background:transparent;border:none;color:#fff;font-family:'Poppins';font-size:13px;font-weight:500;max-width:200px;outline:none;cursor:pointer}
+.pick select option{color:#1E2A38}
+.ib{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:12px;display:grid;place-items:center;transition:.12s;flex:none}.ib:hover{background:rgba(255,255,255,.2)}
+.tabs{display:flex;background:var(--sur);border-bottom:2px solid var(--line);padding:0 24px;gap:2px;transition:background var(--tr);overflow-x:auto}
+.tab{display:flex;align-items:center;gap:8px;padding:13px 16px;border:none;background:transparent;cursor:pointer;font-family:'Poppins';font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.16s;white-space:nowrap}
+.tab svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:2}
+.tab:hover{color:var(--ink)}.tab.on{color:var(--pri);border-bottom-color:var(--pri);font-weight:600}
+.tab .nt{font-size:9px;font-weight:700;background:var(--gold);color:#3A2D05;padding:1px 5px;border-radius:4px}
+main{max-width:1320px;margin:0 auto;padding:24px 24px 60px;position:relative}
+.panel{display:none;animation:fd .28s ease}.panel.on{display:block}
+@keyframes fd{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.ph{margin-bottom:20px}.ph .crumb{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:600}
+.ph h2{font-size:22px;font-weight:600;margin-top:2px;letter-spacing:-.2px}
+.ph p{color:var(--muted);font-size:13px;margin-top:3px;max-width:80ch;font-weight:300}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);transition:background var(--tr),border-color var(--tr)}.card.p{padding:20px}
+.ch{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ch .d{width:7px;height:7px;border-radius:2px;background:var(--pri);flex:none}
+.ch .src{margin-left:auto;font-size:9px;text-transform:none;letter-spacing:0;color:var(--faint);font-weight:500;display:flex;align-items:center;gap:4px}.ch .src i{width:6px;height:6px;border-radius:50%;background:var(--g);display:inline-block}
+.icard{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);display:flex;align-items:center;gap:18px;padding:18px 22px;margin-bottom:16px;flex-wrap:wrap;transition:background var(--tr)}
+.avatar{width:58px;height:58px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:700;color:#fff;flex:none;font-family:'JetBrains Mono',monospace}
+.iinfo h3{font-size:18px;font-weight:600}.iinfo p{font-size:12.5px;color:var(--muted);margin-top:2px}
+.imeta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;border:1px solid var(--line);background:var(--sur2);border-radius:999px;padding:4px 11px;font-weight:500}
+.pill{font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:999px;color:#fff;white-space:nowrap;display:inline-block}
+.kpi{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);padding:16px 18px;box-shadow:var(--shadow);transition:background var(--tr)}
+.kpi .v{font-size:30px;font-weight:700;line-height:1;font-family:'JetBrains Mono',monospace}.kpi .l{font-size:12px;color:var(--muted);margin-top:5px}
+.fg-row{display:flex;align-items:center;gap:10px;margin:10px 0}
+.fg-lab{width:150px;flex:none}.fg-lab .name{font-size:13px;font-weight:500}.fg-lab .sub{font-size:10px;color:var(--faint);margin-top:1px;line-height:1.3}
+.fg-bar{flex:1;height:18px;border-radius:9px;background:var(--sur2);overflow:hidden;position:relative}
+.fg-bar .fill{height:100%;border-radius:9px;transition:width .4s ease}.fg-bar .ref{position:absolute;top:0;height:100%;width:2px;background:var(--ink);opacity:.25}
+.fg-val{width:42px;text-align:right;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:13px}.fg-tier{width:42px;text-align:right;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.fg-head{display:flex;gap:10px;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:4px}
+.fg-scale{flex:1;display:flex;justify-content:space-between}.fg-scale span{font-size:9px;color:var(--faint)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 10px;border-bottom:2px solid var(--line);font-weight:600}
+td{padding:9px 10px;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right;font-family:'JetBrains Mono',monospace}
+tbody tr{transition:.1s}tbody tr:hover{background:var(--sur2)}
+.ctrl-bar{background:var(--pri-soft);border:1px solid var(--line);border-radius:var(--rad);padding:14px 18px;margin-bottom:16px;transition:background var(--tr)}
+.cr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.cs{flex:1;min-width:170px}.cs label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}.cs label b{color:var(--pri);font-weight:700}
+input[type=range]{width:100%;-webkit-appearance:none;height:5px;border-radius:3px;background:#CBD8E6;outline:none}
+[data-theme="dark"] input[type=range]{background:#2A3A4D}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--pri);cursor:pointer;border:3px solid var(--sur);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.btn{font-family:'Poppins';font-weight:600;font-size:12px;border:1px solid var(--pri);background:var(--pri);color:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;transition:.13s}.btn:hover{background:var(--pri-dk)}
+.btn.gh{background:var(--sur);color:var(--pri)}.btn.gh:hover{background:var(--pri-soft)}
+.track{position:relative;margin-left:7px;padding-left:22px}
+.track::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.step{position:relative;margin-bottom:8px}
+.step .node{position:absolute;left:-22px;top:14px;width:13px;height:13px;border-radius:50%;background:var(--sur);border:2.5px solid var(--pri)}
+.step .body{background:var(--sur);border:1px solid var(--line);border-radius:10px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.step .tt{font-size:13px;font-weight:600}.step .tt small{display:block;color:var(--muted);font-size:10px;font-weight:400;margin-top:1px}
+.step .rr{display:flex;align-items:center;gap:8px;flex:none}
+.donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.out-leg{flex:1;min-width:160px}
+.out-row{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line)}.out-row:last-child{border-bottom:none}
+.leg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px}.leg span{display:inline-flex;align-items:center;gap:5px}.leg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.note{font-size:11.5px;color:var(--muted);background:var(--sur2);border:1px dashed var(--line);border-radius:9px;padding:10px 13px;margin-top:14px}.note b{color:var(--ink)}
+svg text{font-family:'Poppins',sans-serif}
+/* tier filter chips */
+.tier-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.tchip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;border:1.5px solid var(--line);background:var(--sur);border-radius:999px;padding:5px 11px;cursor:pointer;transition:.13s;user-select:none}
+.tchip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.tchip.off{opacity:.4}
+.tchip .ct{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:10.5px}
+/* scatter dot + tooltip */
+#scatter svg circle.dot{cursor:pointer;transition:r .1s,opacity .1s}
+#tip{position:fixed;z-index:200;pointer-events:none;background:var(--ink);color:var(--bg);font-size:11.5px;padding:7px 10px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.3);opacity:0;transition:opacity .12s;white-space:nowrap;font-weight:500}
+#tip b{font-family:'JetBrains Mono',monospace}
+#tip .tt-tier{display:block;font-weight:400;opacity:.85;margin-top:1px}
+/* comparison */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cmpcol h4{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#fff;font-weight:600;padding:9px 14px;border-radius:10px 10px 0 0}
+.cmpcol.a h4{background:var(--pri)}.cmpcol.b h4{background:var(--teal)}
+.cmpcol .body{border:1px solid var(--line);border-top:none;border-radius:0 0 12px 12px;overflow:hidden;background:var(--sur)}
+.crow{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid var(--line);font-size:12.5px}.crow:last-child{border-bottom:none}
+.crow .rk{width:22px;height:22px;border-radius:6px;background:var(--sur2);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.crow .nm{flex:1;font-weight:500;line-height:1.25;min-width:0}.crow .nm small{display:block;color:var(--muted);font-weight:400;font-size:10px}
+.mv{font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;white-space:nowrap;font-family:'JetBrains Mono',monospace}
+.mv.up{background:rgba(46,125,91,.14);color:#2E7D5B}.mv.dn{background:rgba(192,73,47,.13);color:#C0492F}.mv.sm{background:var(--sur2);color:var(--faint)}
+.sumchips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.sumchip{background:var(--sur);border:1px solid var(--line);border-radius:11px;padding:10px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px}
+.sumchip .n{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace}.sumchip .t{font-size:11px;color:var(--muted)}
+/* overlay / error / toast */
+.overlay{position:absolute;inset:0;background:rgba(238,242,246,.72);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:20;border-radius:var(--rad)}
+[data-theme="dark"] .overlay{background:rgba(13,27,42,.72)}.overlay.on{display:flex}
+.loader{display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--sur);padding:26px 34px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.spinner{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader .msg{font-size:13.5px;font-weight:600;color:var(--ink)}.loader .sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.errbar{display:none;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:var(--rad);padding:14px 18px;margin-bottom:18px;align-items:center;gap:14px}
+[data-theme="dark"] .errbar{background:#3B1414;border-color:#7F1D1D;color:#FCA5A5}.errbar.on{display:flex}
+.errbar .etxt{flex:1}.errbar .etxt b{display:block;font-size:13.5px;margin-bottom:2px}.errbar .etxt span{font-size:12px;opacity:.85}
+.errbar .btn{background:#991B1B;border-color:#991B1B}
+/* shared cross-app journey strip */
+.journey{display:flex;align-items:center;gap:8px;background:var(--sur2);border-bottom:1px solid var(--line);padding:8px 24px;font-size:12px;overflow-x:auto}
+.jstep{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--muted);font-weight:500;padding:5px 11px;border-radius:999px;transition:.15s;white-space:nowrap}
+.jstep:hover{background:var(--sur);color:var(--ink)}
+.jstep.on{background:var(--pri);color:#fff;font-weight:600;pointer-events:none}
+.jstep .jn{width:16px;height:16px;border-radius:50%;background:var(--sur);color:var(--pri);display:grid;place-items:center;font-size:9.5px;font-weight:700;flex:none}
+.jstep.on .jn{background:rgba(255,255,255,.25);color:#fff}
+.jarrow{color:var(--faint);font-size:11px;flex:none}
+#tw{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--ink);color:var(--bg);padding:9px 15px;border-radius:9px;font-size:12.5px;font-weight:500;box-shadow:0 4px 18px rgba(0,0,0,.28);display:flex;align-items:center;gap:8px;animation:ti .22s ease;pointer-events:all}
+.toast.out{animation:to .22s ease forwards}
+@keyframes ti{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}@keyframes to{to{opacity:0;transform:translateY(7px)}}
+@media(max-width:860px){.g2,.g3,.g4,.cmp{grid-template-columns:1fr}.pick select{max-width:120px}}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1 2.7 3 6 3s6-2 6-3v-5.5"/></svg></div>
+  <div class="brand"><h1>Adaptive Learning Pathway System <span class="badge">LIVE ML</span></h1>
+    <p>Predictions served by FastAPI · scaler → pca → kmeans → ensemble → adaptive</p></div>
+  <div class="topright">
+    <div class="api-pill" id="apiPill" title="Click to change API URL"><span class="api-dot wait" id="apiDot"></span><span id="apiTxt">connecting…</span></div>
+    <div class="pick"><button class="ib" id="prev">‹</button><select id="lsel"></select><button class="ib" id="next">›</button><button class="ib" id="rand" title="Random learner">⟳</button></div>
+    <button class="ib" id="themeBtn" style="font-size:15px">🌙</button>
+    <a class="ib" href="instructor.html" title="Instructor console" style="text-decoration:none;font-size:14px">🎓</a>
+  </div>
+</header>
+
+<div class="journey">
+  <a href="survey.html" class="jstep"><span class="jn">1</span>Student Survey</a>
+  <span class="jarrow">→</span>
+  <a href="dashboard.html" class="jstep on"><span class="jn">2</span>Learner Dashboard</a>
+  <span class="jarrow">→</span>
+  <a href="instructor.html" class="jstep"><span class="jn">3</span>Instructor Console</a>
+</div>
+
+<div class="tabs">
+  <button class="tab on" data-t="0"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Learner Profile</button>
+  <button class="tab" data-t="1"><svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2"/><circle cx="17" cy="6" r="2"/><circle cx="9" cy="16" r="2"/><circle cx="18" cy="16" r="2"/></svg>Clustering</button>
+  <button class="tab" data-t="2"><svg viewBox="0 0 24 24"><path d="M6 4v9a3 3 0 0 0 3 3h6"/><circle cx="6" cy="4" r="2"/><path d="M15 13l3 3-3 3"/></svg>Recommended Pathway</button>
+  <button class="tab" data-t="3"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M18 4v5h-5M6 20v-5h5"/></svg>Adaptive Outcomes</button>
+  <button class="tab" data-t="4"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="16" rx="1"/><rect x="13" y="4" width="7" height="16" rx="1"/></svg>Pathway Comparison <span class="nt">opt</span></button>
+</div>
+
+<main>
+  <div class="errbar" id="errbar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+    <div class="etxt"><b id="errTitle">Cannot reach inference API</b><span id="errMsg"></span></div>
+    <button class="btn" id="retryBtn">Retry</button></div>
+  <div class="overlay" id="overlay"><div class="loader"><div class="spinner"></div><div class="msg" id="loadMsg">Running K-Means clustering…</div><div class="sub" id="loadSub">POST /recommend</div></div></div>
+
+  <!-- 0 PROFILE -->
+  <div class="panel on" data-p="0">
+    <div class="ph"><div class="crumb">Learner Modeling</div><h2>Learner Profile</h2>
+      <p>Survey dimensions are source data. The readiness tier is the <b>live K-Means prediction</b> returned by the API. Tip: click any dot on the <b>Clustering</b> tab to jump to a learner.</p></div>
+    <div id="icard"></div>
+    <div class="g4" id="pkpis" style="margin-bottom:16px"></div>
+    <div class="g2">
+      <div class="card p"><div class="ch"><span class="d"></span>Competency Groups<span class="src"><i></i>tier avg from /clusters</span></div>
+        <div class="fg-head"><div style="width:150px;flex:none"></div><div class="fg-scale"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div><div style="width:42px;text-align:right;font-size:9px;color:var(--faint)">Score</div><div style="width:42px;text-align:right;font-size:9px;color:var(--faint)">Tier</div></div>
+        <div id="fgroups"></div></div>
+      <div class="card p"><div class="ch"><span class="d"></span>Dimension Detail</div>
+        <table id="dimtable"><thead><tr><th>Dimension</th><th class="r">Learner</th><th class="r">Tier Avg</th><th class="r">Gap</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- 1 CLUSTERING -->
+  <div class="panel" data-p="1">
+    <div class="ph"><div class="crumb">Learner Modeling</div><h2>Readiness Clustering</h2>
+      <p>Every dot is a real learner projected live through <b>scaler → pca</b> and labelled by <b>kmeans.predict()</b> via GET /learners. <b>Click a dot to select that learner</b> — hover to preview.</p></div>
+    <div class="g2">
+      <div class="card p"><div class="ch"><span class="d"></span>PCA Projection · <span id="scatN">—</span> learners<span class="src"><i></i>GET /learners</span></div>
+        <div class="tier-chips" id="tierChips"></div>
+        <div id="scatter"></div></div>
+      <div class="card p"><div class="ch"><span class="d"></span>Cluster Scores, Sizes &amp; Tiers<span class="src"><i></i>GET /clusters</span></div>
+        <table id="clust"><thead><tr><th>Tier</th><th class="r">N</th><th class="r">Cap</th><th class="r">Score</th></tr></thead><tbody></tbody></table>
+        <div class="note" id="pcaNote" style="margin-top:14px"></div></div>
+    </div>
+  </div>
+
+  <!-- 2 RECOMMENDED PATHWAY -->
+  <div class="panel" data-p="2">
+    <div class="ph"><div class="crumb">Recommendation Engine</div><h2>Recommended Learning Pathway</h2>
+      <p>The initial pathway (before assessment) — top modules from the <b>hybrid ensemble</b> in POST /recommend.</p></div>
+    <div class="ctrl-bar"><div class="ch" style="margin-bottom:10px"><span class="d"></span>Ensemble Weights → sent to API</div>
+      <div class="cr">
+        <div class="cs"><label>Tier similarity <b id="wcl">33%</b></label><input type="range" id="s_cl" min="0" max="100" value="33"></div>
+        <div class="cs"><label>Content similarity <b id="wco">33%</b></label><input type="range" id="s_co" min="0" max="100" value="33"></div>
+        <div class="cs"><label>Adaptive signal <b id="wad">34%</b></label><input type="range" id="s_ad" min="0" max="100" value="34"></div>
+        <button class="btn gh" id="resetw">Reset ⅓·⅓·⅓</button>
+      </div></div>
+    <div class="g3" id="difcnts" style="margin-bottom:16px"></div>
+    <div class="card p"><div class="ch"><span class="d"></span>Initial Pathway Sequence<span class="src"><i></i>POST /recommend</span></div><div class="track" id="track"></div></div>
+  </div>
+
+  <!-- 3 ADAPTIVE -->
+  <div class="panel" data-p="3">
+    <div class="ph"><div class="crumb">Adaptive Engine</div><h2>Adaptive Outcomes</h2>
+      <p>Simulated assessment, actions, and the optimized sequence — all returned by <b>POST /recommend</b>.</p></div>
+    <div class="ctrl-bar"><div class="ch" style="margin-bottom:10px"><span class="d"></span>Thresholds → sent to API</div>
+      <div class="cr">
+        <div class="cs"><label>Pass threshold <b id="pv">75</b></label><input type="range" id="s_pass" min="50" max="95" value="75"></div>
+        <div class="cs"><label>Mastery threshold <b id="mv">90</b></label><input type="range" id="s_mast" min="80" max="100" value="90"></div>
+        <button class="btn" id="resim">↻ Re-fetch</button>
+      </div></div>
+    <div class="g4" id="akpis" style="margin-bottom:16px"></div>
+    <div class="g2">
+      <div class="card p"><div class="ch"><span class="d"></span>Outcome Distribution<span class="src"><i></i>POST /recommend</span></div><div class="donut-wrap"><div id="donut"></div><div class="out-leg" id="outleg"></div></div></div>
+      <div class="card p"><div class="ch"><span class="d"></span>Optimized Module Sequence<span class="src"><i></i>POST /recommend</span></div>
+        <table id="opti"><thead><tr><th>#</th><th>Module</th><th class="r">Sim Score</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- 4 COMPARISON (the optimized version, side-by-side) -->
+  <div class="panel" data-p="4">
+    <div class="ph"><div class="crumb">Adaptive Engine</div><h2>Pathway Comparison — Initial → Optimized</h2>
+      <p>Left: the ensemble's <b>initial</b> ranking. Right: the <b>optimized</b> pathway after performance-driven adaptation. Arrows show how each module moved; pills show its adaptive action. All from POST /recommend.</p></div>
+    <div class="sumchips" id="cmpSum"></div>
+    <div class="cmp" id="cmpGrid"></div>
+    <div class="leg" style="margin-top:14px">
+      <span><i style="background:var(--g)"></i>Continue</span>
+      <span><i style="background:var(--b)"></i>Skip (Mastered)</span>
+      <span><i style="background:var(--r)"></i>Remedial Required</span>
+      <span><i style="background:var(--g)"></i>▲ moved up</span>
+      <span><i style="background:var(--r)"></i>▼ moved down</span>
+    </div>
+  </div>
+</main>
+
+<div id="tip"></div>
+<div id="tw"></div>
+
+<!-- Fallback roster (used only if GET /learners is unavailable). Viz/demographic only. -->
+<script id="fallback-data" type="application/json">
+{"feats":["capability","academic_fit","engagement","motivation","study_habits","prior_learning","preferences","constraints","commitment","strategies","interest"],
+"pcaVar":[0.616,0.089],
+"learners":[
+[1,22,"M","Full-time Student",-1.52,1.21,4.7,4.5,4.2,4.6,4.3,4.1,4.0,1.0,4.7,4.4,4.2],
+[8,25,"M","Full-time Student",-0.42,0.71,3.6,3.4,3.5,3.6,3.3,3.2,3.1,2.0,3.7,3.4,3.5],
+[17,18,"F","Full-time Student",0.63,-0.42,2.5,2.4,2.6,2.5,2.4,2.2,2.3,3.1,2.4,2.5,2.6],
+[26,18,"M","Full-time Student",1.58,-1.42,1.5,1.6,1.4,1.7,1.5,1.4,1.6,4.1,1.4,1.5,1.6]
+]}
+</script>
+
+<script>
+/* ============================================================================
+   ALPS DASHBOARD — API CLIENT.  No ML math runs here; every prediction comes
+   from the FastAPI backend that loads scaler/pca/kmeans/recommender_config.
+   ============================================================================ */
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+let API_BASE=localStorage.getItem("alps-api")||(location.protocol==="file:"?"http://localhost:8000":"");
+$("apiPill").onclick=()=>{const v=prompt("FastAPI base URL (blank = same origin):",API_BASE);if(v!==null){API_BASE=v.trim();localStorage.setItem("alps-api",API_BASE);boot();}};
+
+async function apiFetch(path,opts={},timeoutMs=10000){
+  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),timeoutMs);let res;
+  try{res=await fetch(API_BASE+path,{...opts,signal:ctrl.signal,headers:{"Content-Type":"application/json",...(opts.headers||{})}});}
+  catch(e){clearTimeout(t);throw new Error(e.name==="AbortError"?"Network timeout — the API did not respond in time.":"API unavailable — could not reach "+(API_BASE||location.origin)+".");}
+  clearTimeout(t);
+  if(!res.ok){let d="";try{d=(await res.json()).detail||"";}catch(_){}throw new Error(`API returned HTTP ${res.status}${d?" — "+d:""}.`);}
+  try{return await res.json();}catch(e){throw new Error("Invalid response — the API did not return valid JSON.");}
+}
+
+const STAGES=["Running K-Means clustering…","Generating recommendations…","Building adaptive pathway…"];
+let stageTimer=null;
+function showLoading(){let i=0;$("loadMsg").textContent=STAGES[0];$("overlay").classList.add("on");stageTimer=setInterval(()=>{i=(i+1)%STAGES.length;$("loadMsg").textContent=STAGES[i];},650);}
+function hideLoading(){clearInterval(stageTimer);$("overlay").classList.remove("on");}
+function showError(msg,title="Inference error"){$("errTitle").textContent=title;$("errMsg").textContent=msg;$("errbar").classList.add("on");}
+function clearError(){$("errbar").classList.remove("on");}
+$("retryBtn").onclick=()=>boot();
+function toast(msg,ic="✓"){const e=document.createElement("div");e.className="toast";e.innerHTML=`<span>${ic}</span>${msg}`;$("tw").appendChild(e);setTimeout(()=>{e.classList.add("out");setTimeout(()=>e.remove(),250)},2400);}
+function setApi(s,t){$("apiDot").className="api-dot "+s;$("apiTxt").textContent=t;}
+
+let dark=localStorage.getItem("alps-d")==="1";
+function applyDark(){document.documentElement.setAttribute("data-theme",dark?"dark":"light");$("themeBtn").textContent=dark?"☀️":"🌙";}
+applyDark();
+$("themeBtn").onclick=()=>{dark=!dark;localStorage.setItem("alps-d",dark?"1":"0");applyDark();if(PRED)renderAll();toast(dark?"Dark mode on":"Light mode on","🎨");};
+
+document.querySelectorAll(".tab").forEach(tb=>tb.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("on"));
+  tb.classList.add("on");document.querySelector(`.panel[data-p="${tb.dataset.t}"]`).classList.add("on");
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+/* ---- state ---- */
+let FE=[],L=[],CLUSTERS=null,PRED=null,cur=0,debounceTimer=null;
+let TIER_COLOR={};               // tier name -> color (rank based)
+let CLUSTER_COLOR={};            // cluster id -> color
+let pcaVar=[0.616,0.089];
+let hiddenTiers=new Set();       // tier filter
+const RANK_COLORS=["--g","--b","--y","--r"]; // best→worst
+
+const DLAB={capability:"Capability",academic_fit:"Academic Fit",engagement:"Engagement",motivation:"Motivation",study_habits:"Study Habits",prior_learning:"Prior Learning",preferences:"Preferences",constraints:"Constraints",commitment:"Commitment",strategies:"Strategies",interest:"Interest"};
+const DC={Beginner:"--g",Intermediate:"--y",Advanced:"--r"};
+const AC={"Continue":"--g","Skip (Mastered)":"--b","Remedial Required":"--r"};
+const GROUPS=[
+  {n:"Academic Ability",sub:"Capability · Acad. Fit · Prior Learning",idx:["capability","academic_fit","prior_learning"],col:"--b"},
+  {n:"Engagement & Drive",sub:"Engagement · Motivation · Interest",idx:["engagement","motivation","interest"],col:"--g"},
+  {n:"Learning Skills",sub:"Study Habits · Commitment · Strategies",idx:["study_habits","commitment","strategies"],col:"--teal"},
+  {n:"Preferences",sub:"Learning preferences fit",idx:["preferences"],col:"--y"},
+  {n:"Constraints",sub:"Barriers (lower = better)",idx:["constraints"],col:"--r"},
+];
+function grpVal(f,idx){return idx.reduce((s,k)=>s+(f[k]??0),0)/idx.length;}
+function tierColor(name){return TIER_COLOR[name]||css("--faint");}
+function tierCentroid(name){const t=CLUSTERS&&CLUSTERS.clusters.find(c=>c.name===name);return t?t.centroid:null;}
+
+/* ---- boot ---- */
+async function boot(){
+  clearError();setApi("wait","connecting…");
+  try{
+    // === FASTAPI CALL #1: GET /health ===
+    const h=await apiFetch("/health",{},6000);
+    if(h.status!=="ok")throw new Error(h.error||"models not loaded on server.");
+    FE=h.feature_order;setApi("ok","API connected");
+
+    // === FASTAPI CALL #2: GET /clusters ===
+    CLUSTERS=await apiFetch("/clusters",{},6000);
+    // rank-based tier colors (clusters already sorted by score desc)
+    TIER_COLOR={};CLUSTER_COLOR={};
+    CLUSTERS.clusters.forEach((c,i)=>{const col=css(RANK_COLORS[Math.min(i,RANK_COLORS.length-1)]);TIER_COLOR[c.name]=col;CLUSTER_COLOR[c.id]=col;});
+
+    // === FASTAPI CALL #3: GET /learners (live PCA + cluster for every learner) ===
+    try{
+      const lr=await apiFetch("/learners",{},8000);
+      FE=lr.feature_order||FE;
+      L=lr.learners.map(o=>({id:o.id,age:o.age,sex:o.sex,type:o.type,feat:o.features,px:o.pca[0],py:o.pca[1],cluster:o.cluster,tier:o.tier}));
+    }catch(_){
+      // fallback roster (no live cluster) — demo still works
+      const fb=JSON.parse($("fallback-data").textContent);FE=fb.feats;pcaVar=fb.pcaVar;
+      L=fb.learners.map(a=>({id:a[0],age:a[1],sex:a[2],type:a[3],px:a[4],py:a[5],cluster:null,tier:null,feat:Object.fromEntries(FE.map((f,j)=>[f,a[6+j]]))}));
+    }
+    // handoff: survey.html sent a respondent via localStorage + ?src=survey.
+    // Splice them into the SAME roster as a real learner (own live PCA/tier),
+    // so the survey → dashboard step is one continuous pipeline, not a demo restart.
+    let handoffIdx=-1;
+    if(new URLSearchParams(location.search).get("src")==="survey"){
+      try{
+        const h=JSON.parse(localStorage.getItem("alps-handoff"));
+        if(h&&h.feat&&FE.every(f=>h.feat[f]!=null)){
+          const t=h.prediction&&h.prediction.tier?h.prediction.tier.name:null;
+          const pcs=(h.prediction&&h.prediction.pca_components)||[0,0];
+          L.unshift({id:"You",age:null,sex:"",type:"Survey respondent",feat:h.feat,
+                     cluster:h.prediction?h.prediction.cluster:null,tier:t,px:pcs[0],py:pcs[1]});
+          handoffIdx=0;
+        }
+      }catch(_){}
+    }
+    buildPicker();buildTierChips();
+    // deep-link: instructor console opens dashboard.html?id=<learnerId>
+    const wantId=new URLSearchParams(location.search).get("id");
+    if(handoffIdx>=0){cur=handoffIdx;}
+    else if(wantId!==null){const ix=L.findIndex(l=>String(l.id)===String(wantId));if(ix>=0)cur=ix;}
+    $("lsel").value=cur;
+    await selectLearner();
+    if(handoffIdx>=0)toast("Showing your live survey result — same scaler → pca → kmeans → ensemble pipeline as the whole cohort.","🔗");
+  }catch(e){setApi("bad","API offline");showError(e.message,"Cannot reach inference API");}
+}
+
+function buildPicker(){const s=$("lsel");s.innerHTML="";L.forEach((l,i)=>{const o=document.createElement("option");o.value=i;o.textContent=l.id==="You"?`★ You (survey) — ${l.tier||"—"}`:`#${l.id} — ${l.tier||l.type}`;s.appendChild(o);});}
+function buildTierChips(){
+  if(!CLUSTERS)return;
+  $("tierChips").innerHTML=CLUSTERS.clusters.map(c=>{
+    const n=L.filter(l=>l.tier===c.name).length;
+    return `<span class="tchip" data-tier="${c.name}"><i style="background:${tierColor(c.name)}"></i>${c.name}<span class="ct">${n}</span></span>`;
+  }).join("");
+  document.querySelectorAll(".tchip").forEach(ch=>ch.onclick=()=>{
+    const t=ch.dataset.tier;
+    if(hiddenTiers.has(t)){hiddenTiers.delete(t);ch.classList.remove("off");}else{hiddenTiers.add(t);ch.classList.add("off");}
+    renderScatter();
+  });
+}
+
+/* ---- core: select learner → POST /recommend ---- */
+function currentWeights(){const a=+$("s_cl").value,b=+$("s_co").value,c=+$("s_ad").value,t=a+b+c||1;return[a/t,b/t,c/t];}
+async function selectLearner(){
+  const l=L[cur];
+  if(!l||!l.feat||FE.some(f=>l.feat[f]==null)){showError("Selected learner has incomplete feature data.","Missing learner data");return;}
+  clearError();showLoading();
+  const payload={features:l.feat,top_k:12,weights:currentWeights(),pass_thr:+$("s_pass").value,mastery_thr:+$("s_mast").value};
+  try{
+    // === FASTAPI CALL #4: POST /recommend  (scaler→pca→kmeans→ensemble→adaptive) ===
+    PRED=await apiFetch("/recommend",{method:"POST",body:JSON.stringify(payload)});
+    renderAll();
+  }catch(e){showError(e.message);}finally{hideLoading();}
+}
+function refetch(){clearTimeout(debounceTimer);debounceTimer=setTimeout(selectLearner,260);}
+function gotoLearner(i){cur=i;$("lsel").value=i;selectLearner();}
+
+$("prev").onclick=()=>gotoLearner((cur-1+L.length)%L.length);
+$("next").onclick=()=>gotoLearner((cur+1)%L.length);
+$("rand").onclick=()=>gotoLearner(Math.floor(Math.random()*L.length));
+$("lsel").onchange=()=>gotoLearner(+$("lsel").value);
+function syncW(){const[a,b,c]=currentWeights();$("wcl").textContent=Math.round(a*100)+"%";$("wco").textContent=Math.round(b*100)+"%";$("wad").textContent=Math.round(c*100)+"%";}
+["s_cl","s_co","s_ad"].forEach(id=>$(id).oninput=()=>{syncW();refetch();});
+$("resetw").onclick=()=>{$("s_cl").value=33;$("s_co").value=33;$("s_ad").value=34;syncW();selectLearner();};
+$("s_pass").oninput=()=>{$("pv").textContent=$("s_pass").value;refetch();};
+$("s_mast").oninput=()=>{$("mv").textContent=$("s_mast").value;refetch();};
+$("resim").onclick=()=>selectLearner();
+document.addEventListener("keydown",e=>{if(e.target.tagName==="SELECT"||e.target.tagName==="INPUT")return;if(e.key==="ArrowLeft")gotoLearner((cur-1+L.length)%L.length);if(e.key==="ArrowRight")gotoLearner((cur+1)%L.length);});
+
+/* ============================ RENDER ============================ */
+function renderAll(){renderProfile();renderScatter();renderClustering();renderPathway();renderAdaptive();renderComparison();}
+
+function renderProfile(){
+  const l=L[cur],tier=PRED.tier,col=tierColor(tier.name);
+  $("icard").innerHTML=`<div class="icard">
+    <div class="avatar" style="background:${col}">${l.id}</div>
+    <div class="iinfo"><h3>Learner #${l.id}</h3><p>${l.age??"—"} yrs · ${l.sex==="F"?"Female":l.sex==="M"?"Male":(l.sex||"—")} · ${l.type||"—"}</p></div>
+    <div class="imeta">
+      <span class="chip" style="border-color:${col}"><i style="width:8px;height:8px;border-radius:50%;background:${col};display:inline-block"></i>${tier.name}</span>
+      <span class="chip">Readiness <b class="mono" style="margin-left:4px">${tier.score.toFixed(2)}</b> / 5</span>
+      <span class="chip">Cluster <b class="mono" style="margin-left:4px">#${PRED.cluster}</b></span>
+    </div></div>`;
+  const gr=GROUPS.map(g=>grpVal(l.feat,g.idx));
+  $("pkpis").innerHTML=[
+    {c:col,v:tier.score.toFixed(2),l:"Readiness (live K-Means)"},
+    {c:css("--g"),v:gr[0].toFixed(2),l:"Academic Ability (/5)"},
+    {c:css("--gold"),v:PRED.summary.mean_ensemble.toFixed(3),l:"Mean ensemble score"},
+    {c:css("--b"),v:PRED.initial_pathway.length,l:"Modules in pathway"},
+  ].map(k=>`<div class="kpi"><div class="v" style="color:${k.c}">${k.v}</div><div class="l">${k.l}</div></div>`).join("");
+  const cen=tierCentroid(tier.name);
+  $("fgroups").innerHTML=GROUPS.map(g=>{const lv=grpVal(l.feat,g.idx),tv=cen?grpVal(cen,g.idx):0,c=css(g.col);
+    return `<div class="fg-row"><div class="fg-lab"><div class="name">${g.n}</div><div class="sub">${g.sub}</div></div>
+      <div class="fg-bar"><div class="fill" style="width:${lv/5*100}%;background:${c}"></div><div class="ref" style="left:${tv/5*100}%"></div></div>
+      <div class="fg-val" style="color:${c}">${lv.toFixed(2)}</div><div class="fg-tier">${tv?tv.toFixed(2):"—"}</div></div>`;}).join("");
+  document.querySelector("#dimtable tbody").innerHTML=FE.map(f=>{const lv=l.feat[f],tv=cen?cen[f]:0,gap=lv-tv,gc=gap>0?css("--g"):gap<0?css("--r"):css("--muted");
+    return `<tr><td>${DLAB[f]||f}</td><td class="r"><b>${lv.toFixed(2)}</b></td><td class="r" style="color:var(--muted)">${tv?tv.toFixed(2):"—"}</td><td class="r"><span style="color:${gc};font-weight:600">${gap>=0?"+":""}${gap.toFixed(2)}</span></td></tr>`;}).join("");
+}
+
+function renderScatter(){
+  const l=L[cur],W=440,H=360,p=36;
+  const xs=L.map(q=>q.px),ys=L.map(q=>q.py);
+  const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);
+  const sx=v=>p+(v-xmin)/((xmax-xmin)||1)*(W-2*p),sy=v=>H-p-(v-ymin)/((ymax-ymin)||1)*(H-2*p);
+  $("scatN").textContent=L.length;
+  const pv=(CLUSTERS&&CLUSTERS.clusters)?pcaVar:pcaVar;
+  let g=`<line x1="${p}" y1="${H-p}" x2="${W-p}" y2="${H-p}" stroke="${css("--line")}"/><line x1="${p}" y1="${p}" x2="${p}" y2="${H-p}" stroke="${css("--line")}"/>`;
+  g+=`<text x="${W/2}" y="${H-6}" font-size="9" fill="${css("--muted")}" text-anchor="middle">PC1 (${(pcaVar[0]*100).toFixed(1)}%)</text>`;
+  g+=`<text x="12" y="${H/2}" font-size="9" fill="${css("--muted")}" text-anchor="middle" transform="rotate(-90 12 ${H/2})">PC2 (${(pcaVar[1]*100).toFixed(1)}%)</text>`;
+  L.forEach((q,i)=>{
+    const hidden=q.tier&&hiddenTiers.has(q.tier);
+    const me=i===cur;
+    const col=q.tier?tierColor(q.tier):css("--faint");
+    const op=hidden?0.06:(me?1:0.55);
+    g+=`<circle class="dot" data-i="${i}" cx="${sx(q.px).toFixed(1)}" cy="${sy(q.py).toFixed(1)}" r="${me?4.2:3}" fill="${col}" opacity="${op}"/>`;
+  });
+  // ring on selected
+  g+=`<circle cx="${sx(l.px).toFixed(1)}" cy="${sy(l.py).toFixed(1)}" r="8.5" fill="none" stroke="${css("--ink")}" stroke-width="2.2" pointer-events="none"/>`;
+  $("scatter").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-height:360px">${g}</svg>`;
+  // attach interactivity
+  const tip=$("tip");
+  $("scatter").querySelectorAll("circle.dot").forEach(c=>{
+    const i=+c.dataset.i,q=L[i];
+    c.onclick=()=>gotoLearner(i);
+    c.onmouseenter=ev=>{tip.innerHTML=`<b>#${q.id}</b>${q.type?" · "+q.type:""}<span class="tt-tier">${q.tier?q.tier:"tier on select"}</span>`;tip.style.opacity="1";c.setAttribute("r","5");};
+    c.onmousemove=ev=>{tip.style.left=(ev.clientX+12)+"px";tip.style.top=(ev.clientY+12)+"px";};
+    c.onmouseleave=()=>{tip.style.opacity="0";c.setAttribute("r",i===cur?"4.2":"3");};
+  });
+}
+
+function renderClustering(){
+  document.querySelector("#clust tbody").innerHTML=CLUSTERS.clusters.map(c=>{
+    const isPred=c.id===PRED.cluster, n=L.filter(x=>x.tier===c.name).length||c.size||"—";
+    return `<tr style="${isPred?'background:var(--pri-soft)':''}">
+      <td><span class="pill" style="background:${tierColor(c.name)}">${c.name}</span></td>
+      <td class="r">${n}</td><td class="r">${(c.centroid.capability??0).toFixed(2)}</td>
+      <td class="r"><b>${c.score.toFixed(2)}</b>${isPred?' <span style="color:var(--g)">●</span>':''}</td></tr>`;
+  }).join("");
+  $("pcaNote").innerHTML=`Selected learner → cluster <b>#${PRED.cluster}</b> (<b>${PRED.tier.name}</b>). Live PCA components: <span class="mono">[${PRED.pca_components.join(", ")}]</span>`;
+}
+
+function renderPathway(){
+  const path=PRED.initial_pathway,cnt={Beginner:0,Intermediate:0,Advanced:0};
+  path.forEach(m=>{if(cnt[m.difficulty]!=null)cnt[m.difficulty]++;});
+  $("difcnts").innerHTML=Object.entries(cnt).map(([k,v])=>`<div class="kpi" style="border-left:4px solid ${css(DC[k]||'--b')}"><div class="v" style="color:${css(DC[k]||'--b')}">${v}</div><div class="l">${k} modules</div></div>`).join("");
+  $("track").innerHTML=path.map((m,i)=>`<div class="step"><div class="node" style="border-color:${css(DC[m.difficulty]||'--b')}"></div><div class="body"><div class="tt">${i+1}. ${m.name}<small>${m.id}${m.strand?" · "+m.strand:""}</small></div><div class="rr">${m.difficulty?`<span class="pill" style="background:${css(DC[m.difficulty]||'--b')}">${m.difficulty}</span>`:''}<span class="mono" style="font-size:13px;font-weight:600;color:var(--pri)">${m.score.toFixed(3)}</span></div></div></div>`).join("");
+}
+
+function renderAdaptive(){
+  const s=PRED.summary,cnt=s.counts,tot=s.total;
+  $("akpis").innerHTML=[
+    {c:css("--g"),v:Math.round(s.pass_rate*100)+"%",l:"Pass Rate"},
+    {c:css("--b"),v:cnt["Continue"],l:"Continue"},
+    {c:css("--b"),v:cnt["Skip (Mastered)"],l:"Skip (Mastered)"},
+    {c:css("--r"),v:cnt["Remedial Required"],l:"Remedial Required"},
+  ].map(k=>`<div class="kpi" style="border-top:3px solid ${k.c}"><div class="v" style="color:${k.c}">${k.v}</div><div class="l">${k.l}</div></div>`).join("");
+  const R=52,cir=2*Math.PI*R;let off=0,segs="";
+  Object.entries(cnt).forEach(([k,v])=>{const len=v/tot*cir;segs+=`<circle cx="72" cy="72" r="${R}" fill="none" stroke="${css(AC[k])}" stroke-width="24" stroke-dasharray="${len} ${cir-len}" stroke-dashoffset="${-off}" transform="rotate(-90 72 72)"/>`;off+=len;});
+  $("donut").innerHTML=`<svg viewBox="0 0 144 144" width="144" height="144">${segs}<text x="72" y="68" font-size="10" fill="${css("--muted")}" text-anchor="middle">MODULES</text><text x="72" y="88" font-size="26" fill="${css("--ink")}" text-anchor="middle" font-weight="700">${tot}</text></svg>`;
+  $("outleg").innerHTML=Object.entries(cnt).map(([k,v])=>`<div class="out-row"><i style="width:11px;height:11px;border-radius:3px;background:${css(AC[k])};flex:none"></i><span style="flex:1">${k}</span><b class="mono">${v}</b><span class="mono" style="color:var(--muted);width:44px;text-align:right">${(v/tot*100).toFixed(0)}%</span></div>`).join("");
+  document.querySelector("#opti tbody").innerHTML=PRED.optimized_pathway.map((m,i)=>`<tr><td class="r">${i+1}</td><td>${m.name}<small style="display:block;color:var(--faint);font-size:10px">${m.id}${m.strand?" · "+m.strand:""}</small></td><td class="r">${m.score}</td><td><span class="pill" style="background:${css(AC[m.action])}">${m.action}</span></td></tr>`).join("");
+}
+
+function renderComparison(){
+  const init=PRED.initial_pathway, opt=PRED.optimized_pathway, cnt=PRED.summary.counts;
+  const reordered=opt.filter(m=>m.new_position!==m.position).length;
+  $("cmpSum").innerHTML=[
+    ["Continue",cnt["Continue"],"--g"],["Skip (Mastered)",cnt["Skip (Mastered)"],"--b"],
+    ["Remedial Required",cnt["Remedial Required"],"--r"],["Re-ordered",reordered,"--gold"]
+  ].map(([t,n,c])=>`<div class="sumchip"><span class="n" style="color:${css(c)}">${n}</span><span class="t">${t}</span></div>`).join("");
+  const left=init.map(m=>`<div class="crow"><span class="rk">${m.position}</span><span class="nm">${m.name}<small>${m.id}${m.difficulty?" · "+m.difficulty:""}</small></span><span class="pill" style="background:${css(DC[m.difficulty]||'--b')}">${m.score.toFixed(2)}</span></div>`).join("");
+  const right=opt.map(m=>{const mv=m.position-m.new_position;const cls=mv>0?"up":mv<0?"dn":"sm";const txt=mv>0?`▲${mv}`:mv<0?`▼${-mv}`:"—";
+    return `<div class="crow"><span class="rk" style="background:${css(AC[m.action])}1A;color:${css(AC[m.action])}">${m.new_position}</span><span class="nm">${m.name}<small>was #${m.position} · sim ${m.score}</small></span><span class="mv ${cls}">${txt}</span><span class="pill" style="background:${css(AC[m.action])}">${m.action.replace(" (Mastered)","").replace(" Required","")}</span></div>`;}).join("");
+  $("cmpGrid").innerHTML=`<div class="cmpcol a"><h4>Initial Pathway · ensemble order</h4><div class="body">${left}</div></div>
+    <div class="cmpcol b"><h4>Optimized Pathway · after adaptation</h4><div class="body">${right}</div></div>`;
+}
+
+syncW();boot();
+</script>
+</body>
+</html>

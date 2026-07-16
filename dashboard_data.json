@@ -1,0 +1,20 @@
+{
+  "_comment": "Source data + demographics + visualization metadata ONLY. Contains NO clustering/recommendation/adaptive output — all predictions come from the FastAPI backend.",
+  "feats": ["capability","academic_fit","engagement","motivation","study_habits","prior_learning","preferences","constraints","commitment","strategies","interest"],
+  "pcaVar": [0.616, 0.089],
+  "tierColors": {"High Readiness":"#2E7D5B","Advanced":"#1F4E79","Intermediate":"#C9A227","Basic":"#C0492F"},
+  "learners": [
+    [1,22,"M","Full-time Student",-1.52,1.21,4.7,4.5,4.2,4.6,4.3,4.1,4.0,1.0,4.7,4.4,4.2],
+    [2,19,"F","Full-time Student",-1.38,0.94,4.5,4.2,4.0,4.3,4.1,3.9,3.8,1.3,4.4,4.1,4.0],
+    [3,24,"F","Working Professional",-1.71,1.42,4.8,4.6,4.3,4.7,4.4,4.2,4.1,0.9,4.8,4.5,4.3],
+    [8,25,"M","Full-time Student",-0.42,0.71,3.6,3.4,3.5,3.6,3.3,3.2,3.1,2.0,3.7,3.4,3.5],
+    [10,22,"M","Full-time Student",-0.31,0.82,3.7,3.5,3.6,3.7,3.4,3.3,3.2,1.8,3.8,3.5,3.6],
+    [13,19,"F","Full-time Student",-0.52,0.48,3.8,3.6,3.7,3.8,3.5,3.4,3.3,1.7,3.9,3.6,3.7],
+    [17,18,"F","Full-time Student",0.63,-0.42,2.5,2.4,2.6,2.5,2.4,2.2,2.3,3.1,2.4,2.5,2.6],
+    [20,29,"M","Part-time Student",0.91,-0.18,2.4,2.3,2.5,2.4,2.3,2.1,2.2,3.2,2.3,2.4,2.5],
+    [21,22,"F","Full-time Student",0.58,-0.67,2.7,2.6,2.8,2.7,2.6,2.4,2.5,2.8,2.6,2.7,2.8],
+    [26,18,"M","Full-time Student",1.58,-1.42,1.5,1.6,1.4,1.7,1.5,1.4,1.6,4.1,1.4,1.5,1.6],
+    [27,40,"F","Working Professional",1.82,-1.74,1.3,1.4,1.2,1.5,1.3,1.2,1.4,4.4,1.2,1.3,1.4],
+    [29,33,"F","Part-time Student",1.91,-1.31,1.4,1.5,1.3,1.6,1.4,1.3,1.5,4.2,1.3,1.4,1.5]
+  ]
+}

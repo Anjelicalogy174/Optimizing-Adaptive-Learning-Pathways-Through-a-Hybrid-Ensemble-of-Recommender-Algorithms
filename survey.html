@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALPS · Learner Profile Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#1F4E79;--pri-dk:#15395B;--pri-soft:#E8EFF6;--gold:#C9A227;--teal:#2A8C82;
+  --bg:#EEF2F6;--sur:#fff;--sur2:#F1F5F9;--ink:#1E2A38;--muted:#5B6B7B;--faint:#9AA7B2;--line:#E2E8EF;
+  --g:#2E7D5B;--b:#1F4E79;--y:#C9A227;--r:#C0492F;
+  --shadow:0 1px 3px rgba(31,46,56,.07),0 8px 20px -12px rgba(31,46,56,.22);--rad:13px;--tr:.2s ease;
+}
+[data-theme="dark"]{--bg:#0D1B2A;--sur:#14253A;--sur2:#1C3147;--ink:#DCE8F4;--muted:#7A95AE;--faint:#4A6070;--line:#243548;--pri-soft:#162438;--shadow:0 2px 4px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.5);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+.mono{font-family:'JetBrains Mono',monospace}
+.bar{background:linear-gradient(105deg,var(--pri-dk),var(--pri) 60%,var(--teal));color:#fff;display:flex;align-items:center;gap:14px;padding:12px 28px;box-shadow:0 2px 12px rgba(21,57,91,.3)}
+.logo{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.brand h1{font-size:15px;font-weight:600;line-height:1.1}.brand p{font-size:11px;color:#C7D7E8;font-weight:300}
+.badge{font-size:9px;font-weight:700;background:var(--gold);color:#3A2D05;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.topright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:5px 10px;font-size:11.5px;font-weight:500;cursor:pointer}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#999;flex:none}
+.api-dot.ok{background:#4ADE80;box-shadow:0 0 6px #4ADE80}.api-dot.bad{background:#F87171;box-shadow:0 0 6px #F87171}.api-dot.wait{background:#FBBF24;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.ib{width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:14px;display:grid;place-items:center;transition:.12s;flex:none}.ib:hover{background:rgba(255,255,255,.2)}
+main{max-width:880px;margin:0 auto;padding:26px 24px 70px}
+
+.steps{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.stp{display:flex;align-items:center;gap:9px;flex:1}
+.stp .num{width:30px;height:30px;border-radius:50%;background:var(--sur);border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px;color:var(--faint);flex:none;transition:.2s}
+.stp.on .num{background:var(--pri);border-color:var(--pri);color:#fff}
+.stp.done .num{background:var(--g);border-color:var(--g);color:#fff}
+.stp .lab{font-size:12.5px;font-weight:500;color:var(--muted)}.stp.on .lab{color:var(--ink);font-weight:600}
+.stp .line{flex:1;height:2px;background:var(--line);margin:0 8px}.stp.done .line{background:var(--g)}
+
+.card{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);transition:background var(--tr)}
+.pad{padding:24px 28px}
+.scr{display:none;animation:fd .3s ease}.scr.on{display:block}
+@keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.qhead .crumb{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:600}
+.qhead h2{font-size:22px;font-weight:600;margin-top:3px;letter-spacing:-.2px}
+.qhead p{color:var(--muted);font-size:13px;margin-top:5px;max-width:74ch;font-weight:300}
+
+.sec-tag{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--teal);background:#E5F1EF;border-radius:999px;padding:5px 13px;margin:20px 0 4px}
+[data-theme="dark"] .sec-tag{background:#173430}
+
+.q{padding:16px 0;border-bottom:1px solid var(--line)}.q:last-child{border-bottom:none}
+.q .qt{font-size:14px;font-weight:500;margin-bottom:4px;display:flex;gap:10px}
+.q .qn{color:var(--faint);font-weight:700;font-family:'JetBrains Mono',monospace;flex:none}
+.q .fil{font-size:12px;color:var(--muted);font-style:italic;font-weight:300;margin:0 0 11px 26px;display:block}
+.likert{display:flex;gap:7px;flex-wrap:wrap}
+.lk{flex:1;min-width:78px;border:1.5px solid var(--line);background:var(--sur);border-radius:10px;padding:9px 6px;text-align:center;cursor:pointer;transition:.13s;user-select:none}
+.lk:hover{border-color:var(--pri);background:var(--pri-soft)}
+.lk.sel{border-color:var(--pri);background:var(--pri);color:#fff;box-shadow:0 2px 8px rgba(31,78,121,.3)}
+.lk .v{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.lk .t{font-size:9.5px;margin-top:2px;line-height:1.15;opacity:.9}
+.q.rev .lk.sel{background:var(--r);border-color:var(--r);box-shadow:0 2px 8px rgba(192,73,47,.3)}
+.revtag{font-size:10px;color:var(--faint);margin:6px 0 0 26px}
+
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px;flex-wrap:wrap}
+.btn{font-family:'Poppins';font-weight:600;font-size:13.5px;border:1px solid var(--pri);background:var(--pri);color:#fff;border-radius:9px;padding:11px 22px;cursor:pointer;transition:.13s;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{background:var(--pri-dk)}
+.btn.gh{background:var(--sur);color:var(--pri)}.btn.gh:hover{background:var(--pri-soft)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.prog-txt{font-size:12px;color:var(--muted)}
+
+.res-hero{background:linear-gradient(120deg,var(--pri),var(--teal));color:#fff;border-radius:var(--rad);padding:24px 28px;margin-bottom:18px;position:relative;overflow:hidden}
+.res-hero .blob{position:absolute;border-radius:50%;background:rgba(255,255,255,.1)}
+.res-hero h2{font-size:14px;font-weight:400;opacity:.9}
+.res-hero .tier{font-size:32px;font-weight:700;margin:4px 0 2px;letter-spacing:-.3px}
+.res-hero p{font-size:12.5px;opacity:.92;max-width:62ch;font-weight:300}
+.res-stats{display:flex;gap:26px;margin-top:16px;flex-wrap:wrap}
+.res-stat .n{font-size:23px;font-weight:700;font-family:'JetBrains Mono',monospace}.res-stat .l{font-size:11px;opacity:.85}
+
+.mod-head{display:flex;align-items:center;gap:9px;margin:20px 0 6px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.mod-head .d{width:7px;height:7px;border-radius:2px;background:var(--pri)}
+.mod-head .src{margin-left:auto;font-size:9px;text-transform:none;letter-spacing:0;color:var(--faint);display:flex;align-items:center;gap:4px}.mod-head .src i{width:6px;height:6px;border-radius:50%;background:var(--g);display:inline-block}
+.mod{display:flex;align-items:center;gap:13px;padding:13px 16px;border:1px solid var(--line);border-radius:11px;margin-bottom:8px;background:var(--sur);box-shadow:var(--shadow);transition:.13s}
+.mod:hover{transform:translateX(2px);border-color:var(--pri)}
+.mod .rk{width:29px;height:29px;border-radius:8px;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;font-weight:700;font-family:'JetBrains Mono',monospace;flex:none}
+.mod .info{flex:1;min-width:0}.mod .info .nm{font-weight:600;font-size:13.5px}.mod .info .sub{font-size:11px;color:var(--muted);margin-top:1px}
+.mod .diff{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;color:#fff;white-space:nowrap}
+.mod .sc{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--pri);font-size:13.5px;width:50px;text-align:right}
+.match-bar{height:5px;border-radius:3px;background:var(--sur2);overflow:hidden;width:64px;flex:none}.match-bar .fill{height:100%;border-radius:3px;background:var(--teal)}
+
+.note{font-size:11.5px;color:var(--muted);background:var(--sur2);border:1px dashed var(--line);border-radius:9px;padding:11px 14px;margin-top:16px}.note b{color:var(--ink)}
+
+.overlay{position:fixed;inset:0;background:rgba(238,242,246,.78);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:60}
+[data-theme="dark"] .overlay{background:rgba(13,27,42,.8)}.overlay.on{display:flex}
+.loader{display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--sur);padding:26px 34px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.spinner{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader .msg{font-size:13.5px;font-weight:600}.loader .sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.errbar{display:none;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:var(--rad);padding:14px 18px;margin-bottom:18px;align-items:center;gap:14px}
+[data-theme="dark"] .errbar{background:#3B1414;border-color:#7F1D1D;color:#FCA5A5}.errbar.on{display:flex}
+.errbar .etxt{flex:1}.errbar .etxt b{display:block;font-size:13.5px;margin-bottom:2px}.errbar .etxt span{font-size:12px;opacity:.85}
+.errbar .btn{background:#991B1B;border-color:#991B1B}
+/* shared cross-app journey strip */
+.journey{display:flex;align-items:center;gap:8px;background:var(--sur2);border-bottom:1px solid var(--line);padding:8px 24px;font-size:12px;overflow-x:auto}
+.jstep{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--muted);font-weight:500;padding:5px 11px;border-radius:999px;transition:.15s;white-space:nowrap}
+.jstep:hover{background:var(--sur);color:var(--ink)}
+.jstep.on{background:var(--pri);color:#fff;font-weight:600;pointer-events:none}
+.jstep .jn{width:16px;height:16px;border-radius:50%;background:var(--sur);color:var(--pri);display:grid;place-items:center;font-size:9.5px;font-weight:700;flex:none}
+.jstep.on .jn{background:rgba(255,255,255,.25);color:#fff}
+.jarrow{color:var(--faint);font-size:11px;flex:none}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1 2.7 3 6 3s6-2 6-3v-5.5"/></svg></div>
+  <div class="brand"><h1>Learner Profile Survey <span class="badge">LIVE ML</span></h1>
+    <p>Answer the questions below to help us understand your learning style and preferences.</p></div>
+  <div class="topright">
+    <div class="api-pill" id="apiPill" title="Click to set API URL"><span class="api-dot wait" id="apiDot"></span><span id="apiTxt">connecting…</span></div>
+    <button class="ib" id="themeBtn">🌙</button>
+    <a class="ib" href="dashboard.html" title="Open analyst dashboard" style="text-decoration:none;font-size:14px">📊</a>
+  </div>
+</header>
+
+<div class="journey">
+  <a href="survey.html" class="jstep on"><span class="jn">1</span>Student Survey</a>
+  <span class="jarrow">→</span>
+  <a href="dashboard.html" class="jstep"><span class="jn">2</span>Learner Dashboard</a>
+  <span class="jarrow">→</span>
+  <a href="instructor.html" class="jstep"><span class="jn">3</span>Instructor Console</a>
+</div>
+
+<main>
+  <div class="errbar" id="errbar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+    <div class="etxt"><b id="errTitle">Cannot reach inference API</b><span id="errMsg"></span></div>
+    <button class="btn" id="retryBtn">Retry</button></div>
+
+  <div class="steps" id="steps">
+    <div class="stp on" data-s="0"><span class="num">1</span><span class="lab">Confidence &amp; Readiness</span><span class="line"></span></div>
+    <div class="stp" data-s="1"><span class="num">2</span><span class="lab">Habits &amp; Preferences</span><span class="line"></span></div>
+    <div class="stp" data-s="2"><span class="num">3</span><span class="lab">Your Pathway</span></div>
+  </div>
+
+  <!-- SCREEN 1 -->
+  <div class="scr on" data-scr="0">
+    <div class="card pad">
+      <div class="qhead"><div class="crumb">Bahagi 1 ng 2 · Learner Profile</div>
+        <h2>Tungkol sa iyong pag-aaral</h2>
+        <p>I-rate kung gaano ka sumasang-ayon sa bawat pahayag. (Rate how much you agree with each statement.)  <b>1</b> = Strongly Disagree · <b>5</b> = Strongly Agree</p></div>
+
+      <div class="sec-tag">📘 Confidence &amp; Academic Fit</div>
+      <div class="q" data-feat="capability"><div class="qt"><span class="qn">Q1</span><span>I can complete academic tasks even when they are challenging.</span></div><span class="fil">Nakakakumpleto ako ng mga gawaing pang-akademiko kahit ito ay mahirap.</span><div class="likert"></div></div>
+      <div class="q" data-feat="academic_fit"><div class="qt"><span class="qn">Q2</span><span>The subjects I am currently taking match my strengths.</span></div><span class="fil">Ang mga asignaturang kinukuha ko ay naaayon sa aking mga kakayahan.</span><div class="likert"></div></div>
+      <div class="q" data-feat="prior_learning"><div class="qt"><span class="qn">Q3</span><span>I have prior knowledge or experience related to my learning tasks.</span></div><span class="fil">Mayroon akong dating kaalaman o karanasan kaugnay ng aking mga gawain sa pagkatuto.</span><div class="likert"></div></div>
+
+      <div class="sec-tag">🔥 Engagement &amp; Motivation</div>
+      <div class="q" data-feat="engagement"><div class="qt"><span class="qn">Q4</span><span>I stay focused while completing learning tasks.</span></div><span class="fil">Nanatili akong nakatuon habang tinatapos ang mga gawain sa pagkatuto.</span><div class="likert"></div></div>
+      <div class="q" data-feat="motivation"><div class="qt"><span class="qn">Q5</span><span>I feel motivated to finish learning activities.</span></div><span class="fil">Nadarama kong may motibasyon akong tapusin ang mga gawain sa pagkatuto.</span><div class="likert"></div></div>
+      <div class="q" data-feat="interest"><div class="qt"><span class="qn">Q6</span><span>I enjoy exploring additional resources beyond what is required.</span></div><span class="fil">Nasisiyahan akong tuklasin ang mga karagdagang sanggunian lampas sa kinakailangan.</span><div class="likert"></div></div>
+
+      <div class="foot"><span class="prog-txt" id="p1">0 of 6 answered</span><button class="btn" id="next1" disabled>Continue → Magpatuloy</button></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2 -->
+  <div class="scr" data-scr="1">
+    <div class="card pad">
+      <div class="qhead"><div class="crumb">Bahagi 2 ng 2 · Habits &amp; Preferences</div>
+        <h2>Mga gawi at kagustuhan sa pag-aaral</h2>
+        <p>Konting tanong na lang tungkol sa study habits, estratehiya, at hamon. (A few more on habits, strategies, and challenges.)</p></div>
+
+      <div class="sec-tag">🛠 Study Habits &amp; Strategies</div>
+      <div class="q" data-feat="study_habits"><div class="qt"><span class="qn">Q7</span><span>I manage my time well when doing academic tasks.</span></div><span class="fil">Maayos kong napamamahalaan ang aking oras kapag may akademikong gawain.</span><div class="likert"></div></div>
+      <div class="q" data-feat="commitment"><div class="qt"><span class="qn">Q8</span><span>I believe learning is important for my future goals.</span></div><span class="fil">Naniniwala akong mahalaga ang pagkatuto para sa aking mga plano sa hinaharap.</span><div class="likert"></div></div>
+      <div class="q" data-feat="strategies"><div class="qt"><span class="qn">Q9</span><span>I practice skills I am weak at until I improve.</span></div><span class="fil">Pinapraktis ko ang mga kasanayang mahina ako hanggang sa ako ay gumaling.</span><div class="likert"></div></div>
+
+      <div class="sec-tag">🎯 Preferences &amp; Challenges</div>
+      <div class="q" data-feat="preferences"><div class="qt"><span class="qn">Q10</span><span>Varied materials (videos, readings, quizzes, interactive) help me learn.</span></div><span class="fil">Nakakatulong sa akin ang iba&#39;t ibang materyales (video, babasahin, pagsusulit, interactive).</span><div class="likert"></div></div>
+      <div class="q rev" data-feat="constraints"><div class="qt"><span class="qn">Q11</span><span>I often face challenges when studying (limited time, distractions, resources).</span></div><span class="fil">Madalas akong nahaharap sa hamon kapag nag-aaral (kulang sa oras, distractions, kagamitan).</span><div class="likert"></div><div class="revtag">↳ Higher = more barriers. The model reverse-scores this. (Mas mataas = mas maraming hadlang.)</div></div>
+
+      <div class="foot"><button class="btn gh" id="back2">← Back</button><span class="prog-txt" id="p2">0 of 5 answered</span><button class="btn" id="submit" disabled>See my pathway ✨ Makita ang pathway</button></div>
+    </div>
+  </div>
+
+  <!-- SCREEN 3 -->
+  <div class="scr" data-scr="2">
+    <div class="res-hero">
+      <div class="blob" style="width:150px;height:150px;top:-55px;right:-25px"></div>
+      <div class="blob" style="width:85px;height:85px;bottom:-35px;right:85px"></div>
+      <h2>Your readiness tier · Antas ng kahandaan</h2>
+      <div class="tier" id="rTier">—</div>
+      <p id="rDesc">—</p>
+      <div class="res-stats">
+        <div class="res-stat"><div class="n" id="rReady">—</div><div class="l">Readiness / 5</div></div>
+        <div class="res-stat"><div class="n" id="rCount">—</div><div class="l">Modules recommended</div></div>
+        <div class="res-stat"><div class="n" id="rCluster">—</div><div class="l">Cluster (K-Means)</div></div>
+        <div class="res-stat"><div class="n" id="rConf">—</div><div class="l">Confidence</div></div>
+      </div>
+    </div>
+
+    <div class="mod-head"><span class="d"></span>Recommended Learning Pathway · Inirerekomendang Pathway<span class="src"><i></i>POST /recommend</span></div>
+    <div id="modList"></div>
+
+    <div class="foot"><button class="btn gh" id="restart">↺ Start over</button><a class="btn" href="dashboard.html" id="detail">Open full dashboard →</a></div>
+  </div>
+</main>
+
+<div class="overlay" id="overlay"><div class="loader"><div class="spinner"></div><div class="msg" id="loadMsg">Running K-Means clustering…</div><div class="sub" id="loadSub">POST /recommend</div></div></div>
+
+<script>
+/* ============================================================================
+   STUDENT QUESTIONNAIRE — wired to the SAME FastAPI backend as dashboard.html.
+   No ML math here: answers (11 features) → POST /recommend → render result.
+   ============================================================================ */
+// $ accepts either a bare element id ("apiPill") or a CSS selector ("#x .y").
+const $=s=>document.querySelector(/^[#.\[]|\s/.test(s)?s:"#"+s),$$=s=>document.querySelectorAll(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* same API-base convention as the dashboard, shared via localStorage */
+let API_BASE=localStorage.getItem("alps-api")||(location.protocol==="file:"?"http://localhost:8000":"");
+$("apiPill").onclick=()=>{const v=prompt("FastAPI base URL (blank = same origin):",API_BASE);if(v!==null){API_BASE=v.trim();localStorage.setItem("alps-api",API_BASE);boot();}};
+function setApi(s,t){$("apiDot").className="api-dot "+s;$("apiTxt").textContent=t;}
+
+/* dark mode (shares the dashboard's preference key) */
+let dark=localStorage.getItem("alps-d")==="1";
+function applyDark(){document.documentElement.setAttribute("data-theme",dark?"dark":"light");$("themeBtn").textContent=dark?"☀️":"🌙";}
+applyDark();
+$("themeBtn").onclick=()=>{dark=!dark;localStorage.setItem("alps-d",dark?"1":"0");applyDark();};
+
+async function apiFetch(path,opts={},timeoutMs=10000){
+  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),timeoutMs);let res;
+  try{res=await fetch(API_BASE+path,{...opts,signal:ctrl.signal,headers:{"Content-Type":"application/json",...(opts.headers||{})}});}
+  catch(e){clearTimeout(t);throw new Error(e.name==="AbortError"?"Network timeout — the API did not respond.":"API unavailable — could not reach "+(API_BASE||location.origin)+".");}
+  clearTimeout(t);
+  if(!res.ok){let d="";try{d=(await res.json()).detail||"";}catch(_){}throw new Error(`API returned HTTP ${res.status}${d?" — "+d:""}.`);}
+  try{return await res.json();}catch(e){throw new Error("Invalid response — API did not return valid JSON.");}
+}
+
+/* ---- feature order comes from the live API (fallback to canonical) ---- */
+let FE=["capability","academic_fit","engagement","motivation","study_habits","prior_learning","preferences","constraints","commitment","strategies","interest"];
+let CLUSTERS=null;
+const answers={};
+
+/* build the 1–5 likert scales */
+const LK=[["1","Strongly Disagree"],["2","Disagree"],["3","Neutral"],["4","Agree"],["5","Strongly Agree"]];
+$$(".q").forEach(q=>{
+  const feat=q.dataset.feat,box=q.querySelector(".likert");
+  LK.forEach(([v,t])=>{
+    const b=document.createElement("div");b.className="lk";b.innerHTML=`<div class="v">${v}</div><div class="t">${t}</div>`;
+    b.onclick=()=>{box.querySelectorAll(".lk").forEach(x=>x.classList.remove("sel"));b.classList.add("sel");answers[feat]=+v;updateProgress();};
+    box.appendChild(b);
+  });
+});
+
+function featsIn(scr){return [...$$(`.scr[data-scr="${scr}"] .q`)].map(q=>q.dataset.feat);}
+function updateProgress(){
+  const c1=featsIn(0).filter(f=>answers[f]!=null).length, c2=featsIn(1).filter(f=>answers[f]!=null).length;
+  $("#p1").textContent=`${c1} of 6 answered`;$("#p2").textContent=`${c2} of 5 answered`;
+  $("#next1").disabled=c1<6;$("#submit").disabled=c2<5;
+}
+function goScreen(n){
+  $$(".scr").forEach(s=>s.classList.remove("on"));$(`.scr[data-scr="${n}"]`).classList.add("on");
+  $$(".stp").forEach((s,i)=>{s.classList.toggle("on",i===n);s.classList.toggle("done",i<n);});
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+$("#next1").onclick=()=>goScreen(1);
+$("#back2").onclick=()=>goScreen(0);
+$("#restart").onclick=()=>{Object.keys(answers).forEach(k=>delete answers[k]);$$(".lk").forEach(x=>x.classList.remove("sel"));updateProgress();goScreen(0);};
+
+/* ---- loading + errors ---- */
+const STAGES=["Running K-Means clustering…","Generating recommendations…","Building adaptive pathway…"];
+let stageTimer=null;
+function showLoading(){let i=0;$("loadMsg").textContent=STAGES[0];$("overlay").classList.add("on");stageTimer=setInterval(()=>{i=(i+1)%STAGES.length;$("loadMsg").textContent=STAGES[i];},650);}
+function hideLoading(){clearInterval(stageTimer);$("overlay").classList.remove("on");}
+function showError(msg,title="Inference error"){$("errTitle").textContent=title;$("errMsg").textContent=msg;$("errbar").classList.add("on");window.scrollTo({top:0,behavior:"smooth"});}
+function clearError(){$("errbar").classList.remove("on");}
+$("retryBtn").onclick=()=>boot();
+
+/* ---- boot: check API + load cluster meta ---- */
+async function boot(){
+  clearError();setApi("wait","connecting…");
+  try{
+    const h=await apiFetch("/health",{},6000);
+    if(h.status!=="ok")throw new Error(h.error||"models not loaded on server.");
+    if(Array.isArray(h.feature_order)&&h.feature_order.length)FE=h.feature_order;
+    setApi("ok","API connected");
+    try{CLUSTERS=await apiFetch("/clusters",{},6000);}catch(_){CLUSTERS=null;}
+  }catch(e){setApi("bad","API offline");showError(e.message,"Cannot reach inference API");}
+}
+
+const DC={Beginner:"--g",Intermediate:"--y",Advanced:"--r"};
+function tierDesc(name){
+  const m={
+    "High Readiness":"advanced, flexible pathways with room to accelerate past mastered topics.",
+    "Advanced":"a structured, advancing pathway with selective acceleration.",
+    "Intermediate":"a guided, step-by-step pathway that builds skills progressively.",
+    "Basic":"a foundational pathway with extra remedial support and reinforcement."
+  };
+  return m[name]||"a personalized pathway suited to your current readiness.";
+}
+
+/* ---- submit → POST /recommend ---- */
+$("#submit").onclick=async()=>{
+  // every feature the model expects must be present
+  const missing=FE.filter(f=>answers[f]==null);
+  if(missing.length){showError("Please answer all questions. Missing: "+missing.join(", "),"Incomplete");return;}
+  clearError();showLoading();
+  const payload={features:Object.fromEntries(FE.map(f=>[f,answers[f]])),top_k:12,weights:[0.33,0.33,0.34],pass_thr:75,mastery_thr:90};
+  try{
+    const P=await apiFetch("/recommend",{method:"POST",body:JSON.stringify(payload)},12000);
+    renderResults(P);goScreen(2);
+    // Hand this exact live prediction off to the dashboard so "Open full dashboard"
+    // shows THIS respondent (not a random roster learner) — same pipeline, same call.
+    try{
+      localStorage.setItem("alps-handoff",JSON.stringify({feat:payload.features,prediction:P,ts:Date.now()}));
+      $("detail").href="dashboard.html?src=survey";
+    }catch(_){}
+  }catch(e){showError(e.message);}finally{hideLoading();}
+};
+
+function renderResults(P){
+  const tier=P.tier||{name:"—",score:0};
+  $("#rTier").textContent=tier.name;
+  $("#rDesc").textContent="Based on your answers, the system grouped you with learners who benefit from "+tierDesc(tier.name);
+  $("#rReady").textContent=(tier.score??0).toFixed(2);
+  $("#rCount").textContent=(P.initial_pathway||[]).length;
+  $("#rCluster").textContent="#"+P.cluster;
+  $("#rConf").textContent=P.confidence!=null?Math.round(P.confidence*100)+"%":"—";
+  const path=P.initial_pathway||[];
+  const maxs=Math.max(...path.map(m=>m.score),0.0001);
+  $("#modList").innerHTML=path.map((m,i)=>{
+    const col=css(DC[m.difficulty]||"--b");
+    return `<div class="mod"><div class="rk">${i+1}</div>
+      <div class="info"><div class="nm">${m.name}</div><div class="sub">${m.id||""}${m.strand?" · "+m.strand:""}</div></div>
+      <div class="match-bar"><div class="fill" style="width:${Math.round(m.score/maxs*100)}%"></div></div>
+      ${m.difficulty?`<span class="diff" style="background:${col}">${m.difficulty}</span>`:""}
+      <span class="sc">${(m.score).toFixed(3)}</span></div>`;
+  }).join("");
+}
+
+updateProgress();boot();
+</script>
+</body>
+</html>

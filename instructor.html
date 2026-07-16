@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALPS · Instructor Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#1F4E79;--pri-dk:#15395B;--pri-soft:#E8EFF6;--gold:#C9A227;--teal:#2A8C82;
+  --bg:#EEF2F6;--sur:#fff;--sur2:#F1F5F9;--ink:#1E2A38;--muted:#5B6B7B;--faint:#9AA7B2;--line:#E2E8EF;
+  --g:#2E7D5B;--b:#1F4E79;--y:#C9A227;--r:#C0492F;
+  --shadow:0 1px 3px rgba(31,46,56,.07),0 8px 20px -12px rgba(31,46,56,.22);--rad:13px;--tr:.2s ease;
+}
+[data-theme="dark"]{--bg:#0D1B2A;--sur:#14253A;--sur2:#1C3147;--ink:#DCE8F4;--muted:#7A95AE;--faint:#4A6070;--line:#243548;--pri-soft:#162438;--shadow:0 2px 4px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.5);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+.mono{font-family:'JetBrains Mono',monospace}
+.bar{background:linear-gradient(105deg,#3A2D05,var(--gold) 55%,#E0B84A);color:#3A2D05;display:flex;align-items:center;gap:14px;padding:10px 24px;box-shadow:0 2px 12px rgba(201,162,39,.35)}
+.logo{width:38px;height:38px;border-radius:10px;background:rgba(58,45,5,.15);border:1px solid rgba(58,45,5,.22);display:grid;place-items:center;flex:none}
+.brand h1{font-size:15px;font-weight:600;line-height:1.1}.brand p{font-size:11px;color:#5C4A12;font-weight:400}
+.badge{font-size:9px;font-weight:700;background:#3A2D05;color:var(--gold);padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.topright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-pill{display:flex;align-items:center;gap:6px;background:rgba(58,45,5,.12);border:1px solid rgba(58,45,5,.2);border-radius:9px;padding:5px 10px;font-size:11.5px;font-weight:600;cursor:pointer;color:#3A2D05}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#999;flex:none}
+.api-dot.ok{background:#1E7A3D}.api-dot.bad{background:#A11}.api-dot.wait{background:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.linkbtn{display:inline-flex;align-items:center;gap:7px;background:#3A2D05;color:var(--gold);border:none;border-radius:9px;padding:8px 13px;font-family:'Poppins';font-weight:600;font-size:12.5px;cursor:pointer;text-decoration:none}
+.ib{width:28px;height:28px;border-radius:7px;border:1px solid rgba(58,45,5,.25);background:rgba(58,45,5,.08);color:#3A2D05;cursor:pointer;font-size:14px;display:grid;place-items:center;flex:none}
+main{max-width:1320px;margin:0 auto;padding:24px 24px 60px;position:relative}
+.ph{margin-bottom:18px}.ph .crumb{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:600}
+.ph h2{font-size:22px;font-weight:600;margin-top:2px;letter-spacing:-.2px}.ph p{color:var(--muted);font-size:13px;margin-top:3px;font-weight:300;max-width:80ch}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.g2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.card{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);transition:background var(--tr)}.card.p{padding:20px}
+.ch{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ch .d{width:7px;height:7px;border-radius:2px;background:var(--gold);flex:none}.ch .src{margin-left:auto;font-size:9px;text-transform:none;letter-spacing:0;color:var(--faint);font-weight:500}
+.kpi{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi .v{font-size:30px;font-weight:700;line-height:1;font-family:'JetBrains Mono',monospace}.kpi .l{font-size:12px;color:var(--muted);margin-top:5px}
+.ctrl-bar{background:#FBF3DC;border:1px solid #EBD9A3;border-radius:var(--rad);padding:14px 18px;margin-bottom:16px}
+[data-theme="dark"] .ctrl-bar{background:#2A2410;border-color:#4A3F18}
+.cr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.cs{flex:1;min-width:200px}.cs label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}.cs label b{color:#8A6E12;font-weight:700}
+input[type=range]{width:100%;-webkit-appearance:none;height:5px;border-radius:3px;background:#E2D08C;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid var(--sur);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.btn{font-family:'Poppins';font-weight:600;font-size:12px;border:1px solid var(--gold);background:var(--gold);color:#3A2D05;border-radius:8px;padding:8px 14px;cursor:pointer}
+.bar-row{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:12.5px}.bar-row .lab{width:130px;flex:none;display:flex;align-items:center;gap:7px}.bar-row .tk{flex:1;height:14px;border-radius:7px;background:var(--sur2);overflow:hidden}.bar-row .tk i{display:block;height:100%;border-radius:7px}.bar-row .vv{width:60px;text-align:right;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 10px;border-bottom:2px solid var(--line);font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--ink)}th .ar{opacity:.4;font-size:9px}
+td{padding:9px 10px;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right;font-family:'JetBrains Mono',monospace}
+tbody tr{transition:.1s}tbody tr:hover{background:var(--sur2)}
+.pill{font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:999px;color:#fff;white-space:nowrap;display:inline-block}
+.stat{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.stat.ok{background:rgba(46,125,91,.14);color:#2E7D5B}.stat.mon{background:rgba(201,162,39,.18);color:#8A6E12}.stat.bad{background:rgba(192,73,47,.14);color:#C0492F}
+.tier-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:0}
+.tchip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;border:1.5px solid var(--line);background:var(--sur);border-radius:999px;padding:5px 11px;cursor:pointer;transition:.13s;user-select:none}
+.tchip i{width:9px;height:9px;border-radius:50%;display:inline-block}.tchip.off{opacity:.4}.tchip .ct{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:10.5px}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--sur);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+.search input{border:none;background:transparent;outline:none;font-family:'Poppins';font-size:13px;color:var(--ink);width:100%}
+.viewbtn{font-size:11px;font-weight:600;border:1px solid var(--pri);color:var(--pri);background:var(--sur);border-radius:7px;padding:4px 11px;cursor:pointer;text-decoration:none;display:inline-block}
+.viewbtn:hover{background:var(--pri-soft)}
+.mini{font-size:10px;color:var(--faint)}
+.overlay{position:absolute;inset:0;background:rgba(238,242,246,.72);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:20;border-radius:var(--rad)}
+[data-theme="dark"] .overlay{background:rgba(13,27,42,.72)}.overlay.on{display:flex}
+.loader{display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--sur);padding:26px 34px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.spinner{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.loader .msg{font-size:13.5px;font-weight:600}.loader .sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.errbar{display:none;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:var(--rad);padding:14px 18px;margin-bottom:18px;align-items:center;gap:14px}
+[data-theme="dark"] .errbar{background:#3B1414;border-color:#7F1D1D;color:#FCA5A5}.errbar.on{display:flex}
+.errbar .etxt{flex:1}.errbar .etxt b{display:block;font-size:13.5px;margin-bottom:2px}.errbar .etxt span{font-size:12px;opacity:.85}.errbar .btn{background:#991B1B;border-color:#991B1B;color:#fff}
+@media(max-width:860px){.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A2D05" stroke-width="1.9"><path d="M3 9l9-5 9 5-9 5-9-5Z"/><path d="M21 9v6"/><path d="M7 11.5V16c0 1.1 2.2 2.5 5 2.5s5-1.4 5-2.5v-4.5"/></svg></div>
+  <div class="brand"><h1>ALPS · Instructor Console <span class="badge">COHORT</span></h1>
+    <p>Class-wide monitoring · every learner scored live by the trained models</p></div>
+  <div class="topright">
+    <div class="api-pill" id="apiPill" title="Click to change API URL"><span class="api-dot wait" id="apiDot"></span><span id="apiTxt">connecting…</span></div>
+    <a class="linkbtn" id="learnerLink" href="dashboard.html" title="Open the learner dashboard">👤 Learner View</a>
+    <a class="ib" href="survey.html" title="Student survey (live demo)" style="text-decoration:none;font-size:14px">📝</a>
+    <button class="ib" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<main>
+  <div class="errbar" id="errbar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+    <div class="etxt"><b id="errTitle">Cannot reach inference API</b><span id="errMsg"></span></div><button class="btn" id="retryBtn">Retry</button></div>
+  <div class="overlay" id="overlay"><div class="loader"><div class="spinner"></div><div class="msg" id="loadMsg">Scoring the whole cohort…</div><div class="sub">POST /cohort</div></div></div>
+
+  <div class="ph"><div class="crumb">Instructor</div><h2>Cohort Console</h2>
+    <p>Every learner is scored live through <b>scaler → pca → kmeans → ensemble → adaptive</b> via <b>POST /cohort</b>. Set thresholds to your assessment policy, then triage who needs support.</p></div>
+
+  <div id="headline" style="display:none;background:var(--sur);border:1px solid var(--line);border-left:5px solid var(--r);border-radius:var(--rad);box-shadow:var(--shadow);padding:14px 20px;margin-bottom:16px;font-size:15px;font-weight:500"></div>
+
+  <div class="ctrl-bar"><div class="ch" style="margin-bottom:10px;color:#8A6E12"><span class="d"></span>Class Assessment Policy → sent to API</div>
+    <div class="cr">
+      <div class="cs"><label>Pass threshold <b id="pv">75</b></label><input type="range" id="s_pass" min="50" max="95" value="75"></div>
+      <div class="cs"><label>Mastery threshold <b id="mv">90</b></label><input type="range" id="s_mast" min="80" max="100" value="90"></div>
+      <button class="btn" id="apply">↻ Recompute Cohort</button>
+    </div></div>
+
+  <div class="g4" id="kpis" style="margin-bottom:16px"></div>
+
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card p"><div class="ch"><span class="d"></span>Readiness Tier Distribution<span class="src">live K-Means</span></div><div id="tierDist"></div></div>
+    <div class="card p"><div class="ch"><span class="d"></span>Remediation Hotspots — hardest modules<span class="src">POST /cohort</span></div><div id="hotspots"></div></div>
+  </div>
+
+  <div class="card p">
+    <div class="ch"><span class="d"></span>Learner Roster — click a column to sort, "View" to drill in</div>
+    <div class="toolbar">
+      <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="search" placeholder="Search by learner # …"></div>
+      <div class="tier-chips" id="tierChips"></div>
+      <div class="tier-chips" id="statusChips"></div>
+    </div>
+    <div style="overflow-x:auto"><table id="roster">
+      <thead><tr>
+        <th data-k="id">Learner <span class="ar">↕</span></th>
+        <th data-k="type">Type <span class="ar">↕</span></th>
+        <th data-k="tier">Tier <span class="ar">↕</span></th>
+        <th class="r" data-k="readiness">Readiness <span class="ar">↕</span></th>
+        <th class="r" data-k="pass_rate">Pass % <span class="ar">↕</span></th>
+        <th class="r" data-k="remedial">Remedial <span class="ar">↕</span></th>
+        <th data-k="status">Status <span class="ar">↕</span></th>
+        <th></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div class="mini" id="rosterCount" style="margin-top:10px"></div>
+  </div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let API_BASE=localStorage.getItem("alps-api")||(location.protocol==="file:"?"http://localhost:8000":"");
+$("apiPill").onclick=()=>{const v=prompt("FastAPI base URL (blank = same origin):",API_BASE);if(v!==null){API_BASE=v.trim();localStorage.setItem("alps-api",API_BASE);boot();}};
+// keep the learner-view link pointing at the same API origin
+$("learnerLink").href="dashboard.html";
+
+async function apiFetch(path,opts={},timeoutMs=15000){
+  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),timeoutMs);let res;
+  try{res=await fetch(API_BASE+path,{...opts,signal:ctrl.signal,headers:{"Content-Type":"application/json",...(opts.headers||{})}});}
+  catch(e){clearTimeout(t);throw new Error(e.name==="AbortError"?"Network timeout — the API did not respond in time.":"API unavailable — could not reach "+(API_BASE||location.origin)+".");}
+  clearTimeout(t);
+  if(!res.ok){let d="";try{d=(await res.json()).detail||"";}catch(_){}throw new Error(`API returned HTTP ${res.status}${d?" — "+d:""}.`);}
+  try{return await res.json();}catch(e){throw new Error("Invalid response — the API did not return valid JSON.");}
+}
+function showLoading(){$("overlay").classList.add("on");}function hideLoading(){$("overlay").classList.remove("on");}
+function showError(msg,title="Cannot reach inference API"){$("errTitle").textContent=title;$("errMsg").textContent=msg;$("errbar").classList.add("on");}
+function clearError(){$("errbar").classList.remove("on");}
+$("retryBtn").onclick=()=>boot();
+function setApi(s,t){$("apiDot").className="api-dot "+s;$("apiTxt").textContent=t;}
+
+let dark=localStorage.getItem("alps-d")==="1";
+function applyDark(){document.documentElement.setAttribute("data-theme",dark?"dark":"light");$("themeBtn").textContent=dark?"☀️":"🌙";}
+applyDark();$("themeBtn").onclick=()=>{dark=!dark;localStorage.setItem("alps-d",dark?"1":"0");applyDark();if(DATA)render();};
+
+const RANK=["--g","--b","--y","--r"];
+let TIER_COLOR={},DATA=null,sortKey="remedial",sortDir=-1,hiddenTiers=new Set(),statusFilter=null,searchTerm="";
+const STATUSC={"On track":"ok","Monitor":"mon","Needs support":"bad"};
+
+async function boot(){
+  clearError();setApi("wait","connecting…");showLoading();
+  try{
+    const h=await apiFetch("/health",{},6000);
+    if(h.status!=="ok")throw new Error(h.error||"models not loaded on server.");
+    setApi("ok","API connected");
+    const cl=await apiFetch("/clusters",{},6000);
+    TIER_COLOR={};cl.clusters.forEach((c,i)=>TIER_COLOR[c.name]=css(RANK[Math.min(i,3)]));
+    await load();
+  }catch(e){setApi("bad","API offline");hideLoading();showError(e.message);}
+}
+async function load(){
+  showLoading();
+  try{
+    // === FASTAPI CALL: POST /cohort  (runs the pipeline for ALL learners) ===
+    DATA=await apiFetch("/cohort",{method:"POST",body:JSON.stringify({top_k:12,weights:[0.34,0.33,0.33],pass_thr:+$("s_pass").value,mastery_thr:+$("s_mast").value})},20000);
+    buildChips();render();
+  }catch(e){showError(e.message);}finally{hideLoading();}
+}
+$("apply").onclick=load;
+$("s_pass").oninput=()=>$("pv").textContent=$("s_pass").value;
+$("s_mast").oninput=()=>$("mv").textContent=$("s_mast").value;
+$("search").oninput=()=>{searchTerm=$("search").value.trim();renderTable();};
+
+function tColor(n){return TIER_COLOR[n]||css("--faint");}
+
+function buildChips(){
+  $("tierChips").innerHTML=DATA.tier_distribution.map(t=>`<span class="tchip" data-tier="${t.name}"><i style="background:${tColor(t.name)}"></i>${t.name}<span class="ct">${t.count}</span></span>`).join("");
+  document.querySelectorAll("#tierChips .tchip").forEach(ch=>ch.onclick=()=>{const t=ch.dataset.tier;if(hiddenTiers.has(t)){hiddenTiers.delete(t);ch.classList.remove("off");}else{hiddenTiers.add(t);ch.classList.add("off");}renderTable();});
+  const sts=["On track","Monitor","Needs support"];
+  $("statusChips").innerHTML=sts.map(s=>`<span class="tchip" data-st="${s}"><i style="background:${css(STATUSC[s]==='ok'?'--g':STATUSC[s]==='mon'?'--y':'--r')}"></i>${s}</span>`).join("");
+  document.querySelectorAll("#statusChips .tchip").forEach(ch=>ch.onclick=()=>{const s=ch.dataset.st;
+    document.querySelectorAll("#statusChips .tchip").forEach(x=>x.classList.remove("off"));
+    if(statusFilter===s){statusFilter=null;}else{statusFilter=s;document.querySelectorAll("#statusChips .tchip").forEach(x=>{if(x.dataset.st!==s)x.classList.add("off");});}
+    renderTable();});
+}
+
+function render(){renderKpis();renderTierDist();renderHotspots();renderTable();}
+
+function renderKpis(){
+  const c=DATA.cohort;
+  // Plain-language headline — the instant takeaway for anyone glancing at the screen.
+  const hl=$("headline");
+  if(c.needs_support>0){
+    hl.style.borderLeftColor=css("--r");
+    hl.innerHTML=`<b style="color:${css('--r')}">${c.needs_support} learner${c.needs_support===1?'':'s'} need support</b> · `+
+      `<b style="color:${css('--y')}">${c.monitor} to monitor</b> · `+
+      `<b style="color:${css('--g')}">${c.on_track} on track</b> &nbsp;<span style="color:var(--muted);font-weight:400;font-size:13px">out of ${c.n_learners} learners</span>`;
+  }else{
+    hl.style.borderLeftColor=css("--g");
+    hl.innerHTML=`<b style="color:${css('--g')}">All ${c.n_learners} learners are on track</b> under the current assessment policy.`;
+  }
+  hl.style.display="block";
+
+  $("kpis").innerHTML=[
+    {c:css("--b"),v:c.n_learners,l:"Learners in cohort"},
+    {c:css("--g"),v:Math.round(c.avg_pass_rate*100)+"%",l:"Average pass rate"},
+    {c:css("--y"),v:c.monitor,l:"To monitor"},
+    {c:css("--r"),v:c.needs_support,l:"Need support",big:true},
+  ].map(k=>`<div class="kpi" style="border-top:3px solid ${k.c}${k.big?';background:'+(css('--r'))+'0D':''}"><div class="v" style="color:${k.c}${k.big?';font-size:38px':''}">${k.v}</div><div class="l"${k.big?' style="font-weight:600;color:var(--ink)"':''}>${k.l}${k.big&&c.n_learners?` · ${Math.round(c.needs_support/c.n_learners*100)}% of class`:''}</div></div>`).join("");
+}
+function renderTierDist(){
+  const max=Math.max(...DATA.tier_distribution.map(t=>t.count));
+  $("tierDist").innerHTML=DATA.tier_distribution.map(t=>`<div class="bar-row"><span class="lab"><i style="width:9px;height:9px;border-radius:50%;background:${tColor(t.name)};display:inline-block"></i>${t.name}</span><div class="tk"><i style="width:${t.count/max*100}%;background:${tColor(t.name)}"></i></div><span class="vv">${t.count} <span style="color:var(--faint);font-size:10px">(${Math.round(t.score*100)/100})</span></span></div>`).join("");
+}
+function renderHotspots(){
+  const max=Math.max(...DATA.module_hotspots.map(m=>m.remedial_count),1);
+  $("hotspots").innerHTML=DATA.module_hotspots.map(m=>`<div class="bar-row"><span class="lab" style="width:170px" title="${m.name}">${m.name.length>22?m.name.slice(0,21)+"…":m.name}</span><div class="tk"><i style="width:${m.remedial_count/max*100}%;background:var(--r)"></i></div><span class="vv">${Math.round(m.remedial_rate*100)}%</span></div>`).join("")||'<div class="mini">No remediation under current thresholds.</div>';
+}
+function sortIcon(k){return sortKey===k?(sortDir>0?"▲":"▼"):"↕";}
+document.querySelectorAll("#roster th[data-k]").forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir=-sortDir;else{sortKey=k;sortDir=(k==="id"||k==="type")?1:-1;}renderTable();});
+function renderTable(){
+  document.querySelectorAll("#roster th[data-k]").forEach(th=>{const a=th.querySelector(".ar");if(a)a.textContent=sortIcon(th.dataset.k);});
+  let rows=DATA.learners.filter(r=>!hiddenTiers.has(r.tier))
+    .filter(r=>!statusFilter||r.status===statusFilter)
+    .filter(r=>!searchTerm||String(r.id).includes(searchTerm));
+  rows=rows.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];if(typeof x==="string")return x.localeCompare(y)*sortDir;return (x-y)*sortDir;});
+  document.querySelector("#roster tbody").innerHTML=rows.map(r=>`<tr>
+    <td><b class="mono">#${r.id}</b> <span class="mini">${r.age?r.age+"y":""} ${r.sex||""}</span></td>
+    <td>${r.type||"—"}</td>
+    <td><span class="pill" style="background:${tColor(r.tier)}">${r.tier}</span></td>
+    <td class="r">${r.readiness.toFixed(2)}</td>
+    <td class="r">${Math.round(r.pass_rate*100)}%</td>
+    <td class="r">${r.remedial>0?`<b style="color:var(--r)">${r.remedial}</b>`:'0'}</td>
+    <td><span class="stat ${STATUSC[r.status]}">${r.status}</span></td>
+    <td><a class="viewbtn" href="dashboard.html?id=${r.id}" target="_blank" rel="noopener">View →</a></td>
+  </tr>`).join("");
+  $("rosterCount").textContent=`Showing ${rows.length} of ${DATA.learners.length} learners`+(statusFilter?` · status: ${statusFilter}`:"")+(hiddenTiers.size?` · ${hiddenTiers.size} tier(s) hidden`:"");
+}
+boot();
+</script><!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALPS · Instructor Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pri:#1F4E79;--pri-dk:#15395B;--pri-soft:#E8EFF6;--gold:#C9A227;--teal:#2A8C82;
+  --bg:#EEF2F6;--sur:#fff;--sur2:#F1F5F9;--ink:#1E2A38;--muted:#5B6B7B;--faint:#9AA7B2;--line:#E2E8EF;
+  --g:#2E7D5B;--b:#1F4E79;--y:#C9A227;--r:#C0492F;
+  --shadow:0 1px 3px rgba(31,46,56,.07),0 8px 20px -12px rgba(31,46,56,.22);--rad:13px;--tr:.2s ease;
+}
+[data-theme="dark"]{--bg:#0D1B2A;--sur:#14253A;--sur2:#1C3147;--ink:#DCE8F4;--muted:#7A95AE;--faint:#4A6070;--line:#243548;--pri-soft:#162438;--shadow:0 2px 4px rgba(0,0,0,.3),0 8px 20px -12px rgba(0,0,0,.5);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+.mono{font-family:'JetBrains Mono',monospace}
+.bar{background:#2B2106;color:#F3E7C4;display:flex;align-items:center;gap:14px;padding:10px 24px;box-shadow:0 2px 12px rgba(0,0,0,.28);border-bottom:3px solid var(--gold)}
+.logo{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(201,162,39,.4);display:grid;place-items:center;flex:none}
+.brand h1{font-size:15px;font-weight:600;line-height:1.1;color:#F6ECC9}.brand p{font-size:11px;color:#B9A468;font-weight:400}
+.badge{font-size:9px;font-weight:700;background:var(--gold);color:#2B2106;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.topright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.api-pill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.3);border-radius:9px;padding:5px 10px;font-size:11.5px;font-weight:600;cursor:pointer;color:#F3E7C4}
+.api-dot{width:8px;height:8px;border-radius:50%;background:#999;flex:none}
+.api-dot.ok{background:#4ADE80;box-shadow:0 0 6px #4ADE80}.api-dot.bad{background:#F87171;box-shadow:0 0 6px #F87171}.api-dot.wait{background:var(--gold);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.linkbtn{display:inline-flex;align-items:center;gap:7px;background:var(--gold);color:#2B2106;border:none;border-radius:9px;padding:8px 13px;font-family:'Poppins';font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:none;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.ib{width:28px;height:28px;border-radius:7px;border:1px solid rgba(201,162,39,.35);background:rgba(255,255,255,.07);color:#F3E7C4;cursor:pointer;font-size:14px;display:grid;place-items:center;flex:none}
+main{max-width:1320px;margin:0 auto;padding:24px 24px 60px;position:relative}
+.ph{margin-bottom:18px}.ph .crumb{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold);font-weight:600}
+.ph h2{font-size:22px;font-weight:600;margin-top:2px;letter-spacing:-.2px}.ph p{color:var(--muted);font-size:13px;margin-top:3px;font-weight:300;max-width:80ch}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.g2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+.card{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);box-shadow:var(--shadow);transition:background var(--tr)}.card.p{padding:20px}
+.ch{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ch .d{width:7px;height:7px;border-radius:2px;background:var(--gold);flex:none}.ch .src{margin-left:auto;font-size:9px;text-transform:none;letter-spacing:0;color:var(--faint);font-weight:500}
+.kpi{background:var(--sur);border:1px solid var(--line);border-radius:var(--rad);padding:16px 18px;box-shadow:var(--shadow)}
+.kpi .v{font-size:30px;font-weight:700;line-height:1;font-family:'JetBrains Mono',monospace}.kpi .l{font-size:12px;color:var(--muted);margin-top:5px}
+.ctrl-bar{background:#FBF3DC;border:1px solid #EBD9A3;border-radius:var(--rad);padding:14px 18px;margin-bottom:16px}
+[data-theme="dark"] .ctrl-bar{background:#2A2410;border-color:#4A3F18}
+.cr{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.cs{flex:1;min-width:200px}.cs label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}.cs label b{color:#8A6E12;font-weight:700}
+input[type=range]{width:100%;-webkit-appearance:none;height:5px;border-radius:3px;background:#E2D08C;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid var(--sur);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.btn{font-family:'Poppins';font-weight:600;font-size:12px;border:1px solid var(--gold);background:var(--gold);color:#3A2D05;border-radius:8px;padding:8px 14px;cursor:pointer}
+.bar-row{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:12.5px}.bar-row .lab{width:130px;flex:none;display:flex;align-items:center;gap:7px}.bar-row .tk{flex:1;height:14px;border-radius:7px;background:var(--sur2);overflow:hidden}.bar-row .tk i{display:block;height:100%;border-radius:7px}.bar-row .vv{width:60px;text-align:right;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 10px;border-bottom:2px solid var(--line);font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--ink)}th .ar{opacity:.4;font-size:9px}
+td{padding:9px 10px;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right;font-family:'JetBrains Mono',monospace}
+tbody tr{transition:.1s}tbody tr:hover{background:var(--sur2)}
+.pill{font-size:10.5px;font-weight:600;padding:3px 10px;border-radius:999px;color:#fff;white-space:nowrap;display:inline-block}
+.stat{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap}
+.stat.ok{background:rgba(46,125,91,.14);color:#2E7D5B}.stat.mon{background:rgba(201,162,39,.18);color:#8A6E12}.stat.bad{background:rgba(192,73,47,.14);color:#C0492F}
+.tier-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:0}
+.tchip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;border:1.5px solid var(--line);background:var(--sur);border-radius:999px;padding:5px 11px;cursor:pointer;transition:.13s;user-select:none}
+.tchip i{width:9px;height:9px;border-radius:50%;display:inline-block}.tchip.off{opacity:.4}.tchip .ct{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:10.5px}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.search{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--sur);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+.search input{border:none;background:transparent;outline:none;font-family:'Poppins';font-size:13px;color:var(--ink);width:100%}
+.viewbtn{font-size:11px;font-weight:600;border:1px solid var(--pri);color:var(--pri);background:var(--sur);border-radius:7px;padding:4px 11px;cursor:pointer;text-decoration:none;display:inline-block}
+.viewbtn:hover{background:var(--pri-soft)}
+.mini{font-size:10px;color:var(--faint)}
+.overlay{position:absolute;inset:0;background:rgba(238,242,246,.72);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:20;border-radius:var(--rad)}
+[data-theme="dark"] .overlay{background:rgba(13,27,42,.72)}.overlay.on{display:flex}
+.loader{display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--sur);padding:26px 34px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.spinner{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.loader .msg{font-size:13.5px;font-weight:600}.loader .sub{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.errbar{display:none;background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;border-radius:var(--rad);padding:14px 18px;margin-bottom:18px;align-items:center;gap:14px}
+[data-theme="dark"] .errbar{background:#3B1414;border-color:#7F1D1D;color:#FCA5A5}.errbar.on{display:flex}
+.errbar .etxt{flex:1}.errbar .etxt b{display:block;font-size:13.5px;margin-bottom:2px}.errbar .etxt span{font-size:12px;opacity:.85}.errbar .btn{background:#991B1B;border-color:#991B1B;color:#fff}
+/* shared cross-app journey strip */
+.journey{display:flex;align-items:center;gap:8px;background:var(--sur2);border-bottom:1px solid var(--line);padding:8px 24px;font-size:12px;overflow-x:auto}
+.jstep{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--muted);font-weight:500;padding:5px 11px;border-radius:999px;transition:.15s;white-space:nowrap}
+.jstep:hover{background:var(--sur);color:var(--ink)}
+.jstep.on{background:var(--pri);color:#fff;font-weight:600;pointer-events:none}
+.jstep .jn{width:16px;height:16px;border-radius:50%;background:var(--sur);color:var(--pri);display:grid;place-items:center;font-size:9.5px;font-weight:700;flex:none}
+.jstep.on .jn{background:rgba(255,255,255,.25);color:#fff}
+.jarrow{color:var(--faint);font-size:11px;flex:none}
+@media(max-width:860px){.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A227" stroke-width="1.9"><path d="M3 9l9-5 9 5-9 5-9-5Z"/><path d="M21 9v6"/><path d="M7 11.5V16c0 1.1 2.2 2.5 5 2.5s5-1.4 5-2.5v-4.5"/></svg></div>
+  <div class="brand"><h1>ALPS · Instructor Console <span class="badge">COHORT</span></h1>
+    <p>Class-wide monitoring · every learner scored live by the trained models</p></div>
+  <div class="topright">
+    <div class="api-pill" id="apiPill" title="Click to change API URL"><span class="api-dot wait" id="apiDot"></span><span id="apiTxt">connecting…</span></div>
+    <a class="linkbtn" id="learnerLink" href="dashboard.html" title="Open the learner dashboard">👤 Learner View</a>
+    <a class="ib" href="survey.html" title="Student survey (live demo)" style="text-decoration:none;font-size:14px">📝</a>
+    <button class="ib" id="themeBtn">🌙</button>
+  </div>
+</header>
+
+<div class="journey">
+  <a href="survey.html" class="jstep"><span class="jn">1</span>Student Survey</a>
+  <span class="jarrow">→</span>
+  <a href="dashboard.html" class="jstep"><span class="jn">2</span>Learner Dashboard</a>
+  <span class="jarrow">→</span>
+  <a href="instructor.html" class="jstep on"><span class="jn">3</span>Instructor Console</a>
+</div>
+
+<main>
+  <div class="errbar" id="errbar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>
+    <div class="etxt"><b id="errTitle">Cannot reach inference API</b><span id="errMsg"></span></div><button class="btn" id="retryBtn">Retry</button></div>
+  <div class="overlay" id="overlay"><div class="loader"><div class="spinner"></div><div class="msg" id="loadMsg">Scoring the whole cohort…</div><div class="sub">POST /cohort</div></div></div>
+
+  <div class="ph"><div class="crumb">Instructor</div><h2>Cohort Console</h2>
+    <p>Every learner is scored live through <b>scaler → pca → kmeans → ensemble → adaptive</b> via <b>POST /cohort</b>. Set thresholds to your assessment policy, then triage who needs support.</p></div>
+
+  <div id="headline" style="display:none;background:var(--sur);border:1px solid var(--line);border-left:5px solid var(--r);border-radius:var(--rad);box-shadow:var(--shadow);padding:14px 20px;margin-bottom:16px;font-size:15px;font-weight:500"></div>
+
+  <div class="ctrl-bar"><div class="ch" style="margin-bottom:10px;color:#8A6E12"><span class="d"></span>Class Assessment Policy → sent to API</div>
+    <div class="cr">
+      <div class="cs"><label>Pass threshold <b id="pv">75</b></label><input type="range" id="s_pass" min="50" max="95" value="75"></div>
+      <div class="cs"><label>Mastery threshold <b id="mv">90</b></label><input type="range" id="s_mast" min="80" max="100" value="90"></div>
+      <button class="btn" id="apply">↻ Recompute Cohort</button>
+    </div></div>
+
+  <div class="g4" id="kpis" style="margin-bottom:16px"></div>
+
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card p"><div class="ch"><span class="d"></span>Readiness Tier Distribution<span class="src">live K-Means</span></div><div id="tierDist"></div></div>
+    <div class="card p"><div class="ch"><span class="d"></span>Remediation Hotspots — hardest modules<span class="src">POST /cohort</span></div><div id="hotspots"></div></div>
+  </div>
+
+  <div class="card p">
+    <div class="ch"><span class="d"></span>Learner Roster — click a column to sort, "View" to drill in</div>
+    <div class="toolbar">
+      <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="search" placeholder="Search by learner # …"></div>
+      <div class="tier-chips" id="tierChips"></div>
+      <div class="tier-chips" id="statusChips"></div>
+    </div>
+    <div style="overflow-x:auto"><table id="roster">
+      <thead><tr>
+        <th data-k="id">Learner <span class="ar">↕</span></th>
+        <th data-k="type">Type <span class="ar">↕</span></th>
+        <th data-k="tier">Tier <span class="ar">↕</span></th>
+        <th class="r" data-k="readiness">Readiness <span class="ar">↕</span></th>
+        <th class="r" data-k="pass_rate">Pass % <span class="ar">↕</span></th>
+        <th class="r" data-k="remedial">Remedial <span class="ar">↕</span></th>
+        <th data-k="status">Status <span class="ar">↕</span></th>
+        <th></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div class="mini" id="rosterCount" style="margin-top:10px"></div>
+  </div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let API_BASE=localStorage.getItem("alps-api")||(location.protocol==="file:"?"http://localhost:8000":"");
+$("apiPill").onclick=()=>{const v=prompt("FastAPI base URL (blank = same origin):",API_BASE);if(v!==null){API_BASE=v.trim();localStorage.setItem("alps-api",API_BASE);boot();}};
+// keep the learner-view link pointing at the same API origin
+$("learnerLink").href="dashboard.html";
+
+async function apiFetch(path,opts={},timeoutMs=15000){
+  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),timeoutMs);let res;
+  try{res=await fetch(API_BASE+path,{...opts,signal:ctrl.signal,headers:{"Content-Type":"application/json",...(opts.headers||{})}});}
+  catch(e){clearTimeout(t);throw new Error(e.name==="AbortError"?"Network timeout — the API did not respond in time.":"API unavailable — could not reach "+(API_BASE||location.origin)+".");}
+  clearTimeout(t);
+  if(!res.ok){let d="";try{d=(await res.json()).detail||"";}catch(_){}throw new Error(`API returned HTTP ${res.status}${d?" — "+d:""}.`);}
+  try{return await res.json();}catch(e){throw new Error("Invalid response — the API did not return valid JSON.");}
+}
+function showLoading(){$("overlay").classList.add("on");}function hideLoading(){$("overlay").classList.remove("on");}
+function showError(msg,title="Cannot reach inference API"){$("errTitle").textContent=title;$("errMsg").textContent=msg;$("errbar").classList.add("on");}
+function clearError(){$("errbar").classList.remove("on");}
+$("retryBtn").onclick=()=>boot();
+function setApi(s,t){$("apiDot").className="api-dot "+s;$("apiTxt").textContent=t;}
+
+let dark=localStorage.getItem("alps-d")==="1";
+function applyDark(){document.documentElement.setAttribute("data-theme",dark?"dark":"light");$("themeBtn").textContent=dark?"☀️":"🌙";}
+applyDark();$("themeBtn").onclick=()=>{dark=!dark;localStorage.setItem("alps-d",dark?"1":"0");applyDark();if(DATA)render();};
+
+const RANK=["--g","--b","--y","--r"];
+let TIER_COLOR={},DATA=null,sortKey="remedial",sortDir=-1,hiddenTiers=new Set(),statusFilter=null,searchTerm="";
+const STATUSC={"On track":"ok","Monitor":"mon","Needs support":"bad"};
+
+async function boot(){
+  clearError();setApi("wait","connecting…");showLoading();
+  try{
+    const h=await apiFetch("/health",{},6000);
+    if(h.status!=="ok")throw new Error(h.error||"models not loaded on server.");
+    setApi("ok","API connected");
+    const cl=await apiFetch("/clusters",{},6000);
+    TIER_COLOR={};cl.clusters.forEach((c,i)=>TIER_COLOR[c.name]=css(RANK[Math.min(i,3)]));
+    await load();
+  }catch(e){setApi("bad","API offline");hideLoading();showError(e.message);}
+}
+async function load(){
+  showLoading();
+  try{
+    // === FASTAPI CALL: POST /cohort  (runs the pipeline for ALL learners) ===
+    DATA=await apiFetch("/cohort",{method:"POST",body:JSON.stringify({top_k:12,weights:[0.34,0.33,0.33],pass_thr:+$("s_pass").value,mastery_thr:+$("s_mast").value})},20000);
+    buildChips();render();
+  }catch(e){showError(e.message);}finally{hideLoading();}
+}
+$("apply").onclick=load;
+$("s_pass").oninput=()=>$("pv").textContent=$("s_pass").value;
+$("s_mast").oninput=()=>$("mv").textContent=$("s_mast").value;
+$("search").oninput=()=>{searchTerm=$("search").value.trim();renderTable();};
+
+function tColor(n){return TIER_COLOR[n]||css("--faint");}
+
+function buildChips(){
+  $("tierChips").innerHTML=DATA.tier_distribution.map(t=>`<span class="tchip" data-tier="${t.name}"><i style="background:${tColor(t.name)}"></i>${t.name}<span class="ct">${t.count}</span></span>`).join("");
+  document.querySelectorAll("#tierChips .tchip").forEach(ch=>ch.onclick=()=>{const t=ch.dataset.tier;if(hiddenTiers.has(t)){hiddenTiers.delete(t);ch.classList.remove("off");}else{hiddenTiers.add(t);ch.classList.add("off");}renderTable();});
+  const sts=["On track","Monitor","Needs support"];
+  $("statusChips").innerHTML=sts.map(s=>`<span class="tchip" data-st="${s}"><i style="background:${css(STATUSC[s]==='ok'?'--g':STATUSC[s]==='mon'?'--y':'--r')}"></i>${s}</span>`).join("");
+  document.querySelectorAll("#statusChips .tchip").forEach(ch=>ch.onclick=()=>{const s=ch.dataset.st;
+    document.querySelectorAll("#statusChips .tchip").forEach(x=>x.classList.remove("off"));
+    if(statusFilter===s){statusFilter=null;}else{statusFilter=s;document.querySelectorAll("#statusChips .tchip").forEach(x=>{if(x.dataset.st!==s)x.classList.add("off");});}
+    renderTable();});
+}
+
+function render(){renderKpis();renderTierDist();renderHotspots();renderTable();}
+
+function renderKpis(){
+  const c=DATA.cohort;
+  // Plain-language headline — the instant takeaway for anyone glancing at the screen.
+  const hl=$("headline");
+  if(c.needs_support>0){
+    hl.style.borderLeftColor=css("--r");
+    hl.innerHTML=`<b style="color:${css('--r')}">${c.needs_support} learner${c.needs_support===1?'':'s'} need support</b> · `+
+      `<b style="color:${css('--y')}">${c.monitor} to monitor</b> · `+
+      `<b style="color:${css('--g')}">${c.on_track} on track</b> &nbsp;<span style="color:var(--muted);font-weight:400;font-size:13px">out of ${c.n_learners} learners</span>`;
+  }else{
+    hl.style.borderLeftColor=css("--g");
+    hl.innerHTML=`<b style="color:${css('--g')}">All ${c.n_learners} learners are on track</b> under the current assessment policy.`;
+  }
+  hl.style.display="block";
+
+  $("kpis").innerHTML=[
+    {c:css("--b"),v:c.n_learners,l:"Learners in cohort"},
+    {c:css("--g"),v:Math.round(c.avg_pass_rate*100)+"%",l:"Average pass rate"},
+    {c:css("--y"),v:c.monitor,l:"To monitor"},
+    {c:css("--r"),v:c.needs_support,l:"Need support",big:true},
+  ].map(k=>`<div class="kpi" style="border-top:3px solid ${k.c}${k.big?';background:'+(css('--r'))+'0D':''}"><div class="v" style="color:${k.c}${k.big?';font-size:38px':''}">${k.v}</div><div class="l"${k.big?' style="font-weight:600;color:var(--ink)"':''}>${k.l}${k.big&&c.n_learners?` · ${Math.round(c.needs_support/c.n_learners*100)}% of class`:''}</div></div>`).join("");
+}
+function renderTierDist(){
+  const max=Math.max(...DATA.tier_distribution.map(t=>t.count));
+  $("tierDist").innerHTML=DATA.tier_distribution.map(t=>`<div class="bar-row"><span class="lab"><i style="width:9px;height:9px;border-radius:50%;background:${tColor(t.name)};display:inline-block"></i>${t.name}</span><div class="tk"><i style="width:${t.count/max*100}%;background:${tColor(t.name)}"></i></div><span class="vv">${t.count} <span style="color:var(--faint);font-size:10px">(${Math.round(t.score*100)/100})</span></span></div>`).join("");
+}
+function renderHotspots(){
+  const max=Math.max(...DATA.module_hotspots.map(m=>m.remedial_count),1);
+  $("hotspots").innerHTML=DATA.module_hotspots.map(m=>`<div class="bar-row"><span class="lab" style="width:170px" title="${m.name}">${m.name.length>22?m.name.slice(0,21)+"…":m.name}</span><div class="tk"><i style="width:${m.remedial_count/max*100}%;background:var(--r)"></i></div><span class="vv">${Math.round(m.remedial_rate*100)}%</span></div>`).join("")||'<div class="mini">No remediation under current thresholds.</div>';
+}
+function sortIcon(k){return sortKey===k?(sortDir>0?"▲":"▼"):"↕";}
+document.querySelectorAll("#roster th[data-k]").forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortDir=-sortDir;else{sortKey=k;sortDir=(k==="id"||k==="type")?1:-1;}renderTable();});
+function renderTable(){
+  document.querySelectorAll("#roster th[data-k]").forEach(th=>{const a=th.querySelector(".ar");if(a)a.textContent=sortIcon(th.dataset.k);});
+  let rows=DATA.learners.filter(r=>!hiddenTiers.has(r.tier))
+    .filter(r=>!statusFilter||r.status===statusFilter)
+    .filter(r=>!searchTerm||String(r.id).includes(searchTerm));
+  rows=rows.sort((a,b)=>{let x=a[sortKey],y=b[sortKey];if(typeof x==="string")return x.localeCompare(y)*sortDir;return (x-y)*sortDir;});
+  document.querySelector("#roster tbody").innerHTML=rows.map(r=>`<tr>
+    <td><b class="mono">#${r.id}</b> <span class="mini">${r.age?r.age+"y":""} ${r.sex||""}</span></td>
+    <td>${r.type||"—"}</td>
+    <td><span class="pill" style="background:${tColor(r.tier)}">${r.tier}</span></td>
+    <td class="r">${r.readiness.toFixed(2)}</td>
+    <td class="r">${Math.round(r.pass_rate*100)}%</td>
+    <td class="r">${r.remedial>0?`<b style="color:var(--r)">${r.remedial}</b>`:'0'}</td>
+    <td><span class="stat ${STATUSC[r.status]}">${r.status}</span></td>
+    <td><a class="viewbtn" href="dashboard.html?id=${r.id}" target="_blank" rel="noopener">View →</a></td>
+  </tr>`).join("");
+  $("rosterCount").textContent=`Showing ${rows.length} of ${DATA.learners.length} learners`+(statusFilter?` · status: ${statusFilter}`:"")+(hiddenTiers.size?` · ${hiddenTiers.size} tier(s) hidden`:"");
+}
+boot();
+</script>
+</body>
+</html>
+</body>
+</html>
