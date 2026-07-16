@@ -1,63 +1,85 @@
-# ALPS — Live ML Inference (FastAPI + Dashboard)
+# ALPS — Adaptive Learning Pathway System
 
-The dashboard no longer computes anything. Every clustering, recommendation, and
-adaptive-pathway result is produced by the trained artifacts through FastAPI:
+Optimizing adaptive learning pathways through a hybrid ensemble of recommender algorithms — built for the Philippine Alternative Learning System (ALS).
+
+One FastAPI backend serves live ML predictions to three separate frontends: a student survey, a per-learner analyst dashboard, and an instructor cohort console.
 
 ```
-11 features → scaler.joblib → pca.joblib → kmeans.joblib → cluster
-            → hybrid ensemble (cluster + content + adaptive) → top-K pathway
-            → simulated assessment → adaptive actions → optimized pathway
+scaler → pca → kmeans → ensemble → adaptive
 ```
 
-## Files
-| File | Role |
-|------|------|
-| `app.py` | FastAPI backend. Loads the 4 `.joblib` artifacts + `module_data.csv`, exposes `/health`, `/clusters`, `/recommend`. |
-| `dashboard.html` | Frontend. Calls the API; **contains no ML math**. |
-| `dashboard_data.json` | Learner roster + demographics + PCA scatter coords only. **No predictions.** |
-| `requirements.txt` | Python deps. |
+No ML inference runs in the browser. Every score is computed server-side from trained artifacts (`scaler.joblib`, `pca.joblib`, `kmeans.joblib`) at request time, so all three frontends always agree.
 
-Put real artifacts next to `app.py`:
-`scaler.joblib  pca.joblib  kmeans.joblib  recommender_config.joblib  module_data.csv`
+## How it fits together
 
-## Run
+| Page | Role | Calls |
+|---|---|---|
+| `index.html` | Landing page — explains the system, links to the other three | — |
+| `survey.html` | 11-item bilingual (EN/FIL) learner survey | `POST /recommend` |
+| `dashboard.html` | Per-learner profile, clustering, pathway, adaptive outcomes | `GET /learners`, `GET /clusters`, `POST /recommend` |
+| `instructor.html` | Whole-cohort triage view | `POST /cohort` |
+
+Finishing the survey hands that exact respondent (answers + live prediction) to the dashboard via `localStorage`, so "Open full dashboard" opens on *you*, not a random learner — it's one continuous walkthrough, not three separate demos.
+
+## Model summary
+
+- **PCA** — 4 components, 61.6% variance on PC1, 83.8% cumulative
+- **K-Means** — k = 4, silhouette ≈ 0.26, mapped to readiness tiers: `High Readiness`, `Advanced`, `Intermediate`, `Basic`
+- **Hybrid ensemble** — ranks modules by a weighted blend of cluster similarity, content similarity, and an adaptive signal (`score = w₁·cluster_sim + w₂·content_sim + w₃·adaptive`), weights adjustable live from the dashboard
+- **Adaptive layer** — per-module assessment is a deterministic, seeded *simulation* standing in for a live formative-assessment system (see `simulate_assessment()` in `app.py`); it's the one part of the pipeline that isn't backed by a trained model
+
+## API
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | Artifact load status |
+| `GET` | `/clusters` | Tier definitions and centroids |
+| `GET` | `/learners` | Full roster, scored live |
+| `POST` | `/recommend` | Full prediction for one learner |
+| `POST` | `/cohort` | Whole cohort scored in one batch |
+| `GET` | `/metrics` | Live PCA variance, silhouette, confidence — never fabricated |
+
+## Getting started
+
+**Requirements:** Python 3.10+, `fastapi`, `uvicorn`, `pandas`, `numpy`, `joblib`, `scikit-learn`, `pydantic`
+
 ```bash
-pip install -r requirements.txt
-uvicorn app:app --reload --port 8000      # backend at http://localhost:8000
+pip install fastapi uvicorn pandas numpy joblib scikit-learn pydantic
 ```
-Open `dashboard.html`. If served from a different origin, click the API pill
-(top-right) and set the URL to `http://localhost:8000`. CORS is already enabled.
 
-**Tip (zero-CORS demo):** uncomment the last 3 lines of `app.py` to serve the
-dashboard from FastAPI itself, then just open `http://localhost:8000/`.
+**Expected files** alongside `app.py` (or in the directory set by `ALPS_ARTIFACTS`):
 
-## Verify endpoints
+```
+scaler.joblib
+pca.joblib
+kmeans.joblib
+recommender_config.joblib
+module_data.csv
+learner_data.csv        # optional — dashboard falls back to a built-in roster if absent
+```
+
+**Run the backend:**
+
 ```bash
-curl http://localhost:8000/health
-curl http://localhost:8000/clusters
-curl -X POST http://localhost:8000/recommend -H "Content-Type: application/json" \
-  -d '{"features":{"capability":4.2,"academic_fit":4.0,"engagement":4.5,"motivation":4.7,"study_habits":4.1,"prior_learning":3.8,"preferences":4.4,"constraints":3.2,"commitment":4.6,"strategies":4.3,"interest":4.8},"top_k":12,"weights":[0.33,0.33,0.34],"pass_thr":75,"mastery_thr":90}'
+uvicorn app:app --reload --port 8000
 ```
 
-## Where the API is called
-In `dashboard.html`, search for `FASTAPI CALL`:
-- **#1 `GET /health`** — on boot, drives the connection badge.
-- **#2 `GET /clusters`** — tier table + centroids.
-- **#3 `POST /recommend`** — fires on every learner select / slider change.
+**Open the demo:** open `index.html` in a browser and start from there, or jump straight to `survey.html`, `dashboard.html`, or `instructor.html`.
 
-## Assumptions to verify against real artifacts
-1. **Feature order** (`FEATURE_ORDER` in `app.py`) must match training order.
-2. KMeans was trained on **PCA output** (centroids inverse-transformed back to
-   feature space for ensemble scoring).
-3. `module_data.csv` has the 11 feature columns by name, plus `id`/`name`/
-   `strand`/`difficulty`. Missing columns are derived with documented fallbacks.
-4. `recommender_config.joblib` may optionally provide `feature_order`,
-   `tier_names`, `cluster_to_tier`, `cluster_sizes`, `module_features` — all
-   have fallbacks if absent.
+If the API is unreachable, `dashboard.html` falls back to a small built-in roster automatically so the UI still runs.
 
-## Defense statement (now true)
-> "Recommendations are generated by trained ML models — `scaler.joblib`,
-> `pca.joblib`, `kmeans.joblib`, and `recommender_config.joblib` — loaded and
-> executed server-side via FastAPI inference. The browser only renders the
-> JSON the API returns; it performs no clustering, recommendation, or
-> adaptive-optimization computation."
+## Project structure
+
+```
+app.py            FastAPI inference backend
+index.html         Landing page / system overview
+survey.html         Learner-facing profile survey
+dashboard.html       Per-learner analyst dashboard
+instructor.html       Instructor cohort console
+```
+
+## Thesis
+
+*Optimizing Adaptive Learning Pathways Through a Hybrid Ensemble of Recommender Algorithms*
+Anjelica M. Castillo · M.S. Computer Science, Technological Institute of the Philippines, Manila
+Adviser: Dr. Melvin Ballera
