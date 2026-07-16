@@ -17,7 +17,7 @@ adaptive-pathway result is produced by the trained artifacts through FastAPI:
 | `dashboard_data.json` | Learner roster + demographics + PCA scatter coords only. **No predictions.** |
 | `requirements.txt` | Python deps. |
 
-Put your real artifacts next to `app.py`:
+Put real artifacts next to `app.py`:
 `scaler.joblib  pca.joblib  kmeans.joblib  recommender_config.joblib  module_data.csv`
 
 ## Run
@@ -39,13 +39,13 @@ curl -X POST http://localhost:8000/recommend -H "Content-Type: application/json"
   -d '{"features":{"capability":4.2,"academic_fit":4.0,"engagement":4.5,"motivation":4.7,"study_habits":4.1,"prior_learning":3.8,"preferences":4.4,"constraints":3.2,"commitment":4.6,"strategies":4.3,"interest":4.8},"top_k":12,"weights":[0.33,0.33,0.34],"pass_thr":75,"mastery_thr":90}'
 ```
 
-## Where the API is called (for the panel)
+## Where the API is called
 In `dashboard.html`, search for `FASTAPI CALL`:
 - **#1 `GET /health`** — on boot, drives the connection badge.
 - **#2 `GET /clusters`** — tier table + centroids.
 - **#3 `POST /recommend`** — fires on every learner select / slider change.
 
-## Assumptions to verify against your real artifacts
+## Assumptions to verify against real artifacts
 1. **Feature order** (`FEATURE_ORDER` in `app.py`) must match training order.
 2. KMeans was trained on **PCA output** (centroids inverse-transformed back to
    feature space for ensemble scoring).
